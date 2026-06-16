@@ -1,0 +1,36 @@
+﻿@model List<Demo_web_MVC.Models.ViewModel.Product.ProductViewModel>
+
+@foreach( var item in Model )
+{
+    @if (item != null)
+    {
+        var imagePath = item.imageUrl != null && item.imageUrl.Any()
+        ? item.imageUrl.First()
+        : Url.Content("~/uploads/images/no-image.jpg");
+
+        var price = item.Variants != null && item.Variants.Any()
+            ? item.Variants.Min(v => v.Price)
+            : 0;
+    
+    <div class="group bg-white rounded-xl shadow-[0px_4px_12px_rgba(0,0,0,0.05)] hover:shadow-[0px_8px_24px_rgba(0,0,0,0.1)] transition-all duration-300 hover:-translate-y-1 overflow-hidden flex flex-col h-full">
+        <div class="aspect-square overflow-hidden bg-gray-100 relative">
+
+            <a asp-controller="Product" asp-action="Details" asp-route-id="@item.Id">
+            <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Close-up of sleek white running shoes with blue accents on a clean minimalist studio background"
+                     src="@imagePath"
+                     onerror="this.onerror=null;this.src='@Url.Content("~/uploads/images/no-image.jpg")';" />
+            </a>
+            <button class="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/80 backdrop-blur shadow-sm flex items-center justify-center text-error hover:bg-white transition-colors">
+                <span class="material-symbols-outlined text-lg">favorite</span>
+            </button>
+        </div>
+        <div class="p-4 flex flex-col flex-grow">
+            <h3 class="font-body-base text-on-surface mb-2 line-clamp-2 min-h-[3rem]">@item.Name ?? "Tên sản phẩm không có"</h3>
+            <div class="mt-auto">
+                <p class="font-price-lg text-price-lg text-primary-container mb-4">@string.Format(new System.Globalization.CultureInfo("vi-VN"), "{0:N0} ₫", price)</p>
+                <a class="block w-full py-2 text-center border border-primary-container text-primary-container font-label-bold text-label-bold rounded-lg hover:bg-primary-container hover:text-white transition-all" asp-controller="Product" asp-action="Details" asp-route-id="@item.Id">Xem chi tiết</a>
+            </div>
+        </div>
+    </div>
+    }
+}

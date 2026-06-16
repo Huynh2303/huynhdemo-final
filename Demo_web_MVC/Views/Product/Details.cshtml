@@ -1,0 +1,470 @@
+﻿
+@using System.Text.Json
+@model Demo_web_MVC.Models.ViewModel.Product.ProductViewModel
+
+@{
+    var allImages = new List<string>();
+
+    if (Model?.imageUrl != null)
+    {
+        allImages.AddRange(Model.imageUrl);
+    }
+
+    if (Model?.Variants != null)
+    {
+        foreach (var variant in Model.Variants)
+        {
+            if (variant.ImageUrlsVariants != null)
+            {
+                allImages.AddRange(variant.ImageUrlsVariants);
+            }
+        }
+    }
+
+    allImages = allImages
+        .Where(x => !string.IsNullOrWhiteSpace(x))
+        .Distinct()
+        .ToList();
+
+    if (!allImages.Any())
+    {
+        allImages.Add("~/uploads/images/no-image.jpg");
+    }
+    var isOutOfStock = Model!.Variants == null || !Model.Variants.Any(v => v.Stock > 0);
+    var toastMessage = TempData["SuccessMessage"]?.ToString()
+        ?? TempData["ErrorMessage"]?.ToString();
+
+    var isSuccessToast = TempData["SuccessMessage"] != null;
+}
+
+<main class="max-w-[1200px] mx-auto px-8 pt-24 pb-xl">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-xl">
+
+        <!-- Cột trái: ảnh sản phẩm -->
+        <div class="space-y-md">
+            
+            <!-- Ảnh lớn: hiển thị tất cả ảnh và trượt ngang -->
+            <div id="mainImageSlider" class="flex gap-md overflow-x-auto pb-2 hide-scrollbar scroll-smooth">
+                @for (int i = 0; i < allImages.Count; i++)
+                {
+                    var img = allImages[i];
+
+                    <div id="product-image-@i"
+                         class="zoom-container flex-shrink-0 w-full overflow-hidden rounded-xl bg-surface-container-lowest shadow-[0px_4px_12px_rgba(0,0,0,0.05)] aspect-square border border-slate-100">
+                        <img alt="Ảnh sản phẩm"
+                             class="w-full h-full object-cover transition-transform duration-500 ease-out"
+                             src="@Url.Content(img)" />
+                    </div>
+                }
+            </div>
+
+            <!-- Ảnh thu nhỏ: cũng hiển thị tất cả ảnh -->
+            <div class="flex gap-sm overflow-x-auto pb-2 hide-scrollbar">
+                @for (int i = 0; i < allImages.Count; i++)
+                {
+                    var img = allImages[i];
+
+                    <div class="thumbnail-box flex-shrink-0 w-24 h-24 rounded-lg border-2 border-primary-container overflow-hidden cursor-pointer"
+                         data-target="product-image-@i">
+                        <img alt="Ảnh thu nhỏ"
+                             class="thumbnail-image w-full h-full object-cover"
+                             src="@Url.Content(img)" />
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Cột phải: thông tin sản phẩm -->
+        <div class="flex flex-col">
+            <h1 class="font-display-lg text-display-lg text-on-background mb-unit">@Model.Name</h1>
+
+            <div class="flex items-center gap-2 mb-md">
+                <div class="flex text-tertiary-container">
+                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL';">star</span>
+                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL';">star</span>
+                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL';">star</span>
+                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL';">star</span>
+                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL';">star_half</span>
+                </div>
+
+                
+            </div>
+
+            <div class="flex items-center gap-4 mb-lg">
+                <span class="font-price-lg text-price-lg text-on-background">
+                    @string.Format("{0:N0}đ", Model.Variants!.Min(v => v.Price))
+                </span>
+            </div>
+
+            <p class="text-body-base text-on-surface-variant mb-lg leading-relaxed line-clamp-3">
+                @Model.Description
+            </p>
+
+            <form asp-controller="Cart" asp-action="AddToCart" method="post" id="addToCartForm">
+                <input type="hidden" name="variantId" id="selectedVariantId" />
+                <input type="hidden" name="quantity" id="hiddenQuantity" value="1" />
+
+                <div class="space-y-lg border-t border-slate-100 pt-lg">
+
+                    @if (Model.Variants!
+                        .Where(v => v.Size != null)
+                        .Select(v => v.Size)
+                        .Distinct()
+                        .Any())
+                    {
+                        <div>
+                            <span class="font-label-bold text-label-bold text-on-background block mb-sm">
+                                Chọn kích thước
+                            </span>
+
+                            <div class="flex gap-2 flex-wrap">
+                                @foreach (var size in Model.Variants!
+                                    .Where(v => v.Size != null)
+                                    .Select(v => v.Size)
+                                    .Distinct())
+                                {
+                                    <label class="cursor-pointer">
+                                        <input type="radio"
+                                               name="size"
+                                               value="@size"
+                                               data-size="@size"
+                                               class="peer hidden size-option"
+                                                />
+
+                                        <span class="px-6 py-2 rounded-lg border border-gray-300 text-gray-600 font-semibold hover:border-blue-500 transition-all peer-checked:bg-blue-500 peer-checked:text-white peer-checked:border-blue-500">
+                                            @size
+                                        </span>
+                                    </label>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    @if (Model.Variants!
+                        .Where(v => v.Color != null)
+                        .Select(v => v.Color)
+                        .Distinct()
+                        .Any())
+                    {
+                        <div>
+                            <span class="font-label-bold text-label-bold text-on-background block mb-sm">
+                                Màu sắc
+                            </span>
+
+                            <div class="flex gap-3 flex-wrap">
+                                @foreach (var color in Model.Variants!
+                                    .Where(v => v.Color != null)
+                                    .Select(v => v.Color)
+                                    .Distinct())
+                                {
+                                    <label class="cursor-pointer">
+                                        <input type="radio"
+                                               name="color"
+                                               value="@color"
+                                               data-color="@color"
+                                               class="peer hidden color-option"
+                                                />
+
+                                        <span class="px-6 py-2 rounded-lg border border-gray-300 text-gray-600 font-semibold hover:border-blue-500 transition-all peer-checked:bg-blue-500 peer-checked:text-white peer-checked:border-blue-500">
+                                            @color
+                                        </span>
+                                    </label>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <div class="flex flex-col gap-md pt-md">
+                        <div class="flex items-center gap-lg">
+                            <div class="flex items-center border border-outline-variant rounded-lg bg-white h-12 px-2">
+                                <button type="button"
+                                        id="decreaseQty"
+                                        class="w-8 h-8 flex items-center justify-center text-secondary hover:text-primary-container transition-colors">
+                                    <span class="material-symbols-outlined text-lg">remove</span>
+                                </button>
+
+                                <input id="quantityInput"
+                                       class="w-20 text-center border-none focus:ring-0 text-body-base font-bold bg-transparent"
+                                       type="number"
+                                       value="1"
+                                       min="1" />
+
+                                <button type="button"
+                                        id="increaseQty"
+                                        class="w-8 h-8 flex items-center justify-center text-secondary hover:text-primary-container transition-colors">
+                                    <span class="material-symbols-outlined text-lg">add</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row gap-md">
+                            <button type="submit"
+                                @(isOutOfStock ? "disabled" : "")
+                                    class="flex-1 @(isOutOfStock
+                                                    ? "bg-gray-400 text-gray-800 cursor-not-allowed opacity-70"
+                                                    : "bg-primary-container text-white shadow-sm hover:opacity-90 active:scale-[0.98]") font-label-bold py-4 rounded-lg transition-all flex items-center justify-center gap-2">
+                                <span class="material-symbols-outlined">shopping_cart</span>
+                                Thêm vào giỏ hàng
+                            </button>
+
+                            <button type="button"
+                                    disabled
+                                    class="flex-1 bg-gray-200 border-2 border-gray-300 text-gray-500 font-label-bold py-4 rounded-lg cursor-not-allowed opacity-70">
+                                Mua ngay
+                            </button>
+                        </div>
+
+                        @if (isOutOfStock)
+                        {
+                            <p class="mt-2 text-sm text-red-600 font-semibold">
+                                Sản phẩm đã hết hàng
+                            </p>
+                        }
+                    </div>
+                </div>
+            </form>
+        </div>
+        @if (!string.IsNullOrEmpty(toastMessage))
+        {
+            <div id="toastMessage"
+                 class="fixed top-24 right-6 z-[99999] w-[360px] bg-white border border-slate-200 rounded-xl shadow-[0px_8px_30px_rgba(0,0,0,0.12)] px-4 py-3 flex items-start gap-3">
+
+                <div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0
+                    @(isSuccessToast ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600")">
+                    <span class="material-symbols-outlined text-[22px]">
+                        @(isSuccessToast ? "check_circle" : "error")
+                    </span>
+                </div>
+
+                <div class="flex-1">
+                    <p class="text-sm font-semibold text-slate-800">
+                        @(isSuccessToast ? "Thành công" : "Thông báo")
+                    </p>
+
+                    <p class="text-sm text-slate-500 mt-0.5">
+                        @toastMessage
+                    </p>
+                </div>
+
+                <button type="button"
+                        onclick="document.getElementById('toastMessage')?.remove()"
+                        class="text-slate-400 hover:text-slate-600 transition">
+                    <span class="material-symbols-outlined text-[20px]">close</span>
+                </button>
+            </div>
+        }
+    </div>
+
+    <section class="mt-xl">
+        <div class="flex border-b border-slate-200 gap-xl mb-lg">
+            <button class="pb-md font-label-bold text-label-bold text-primary-container border-b-2 border-primary-container uppercase tracking-wider">
+                Mô tả sản phẩm
+            </button>
+        </div>
+
+        <div class="prose prose-slate max-w-none text-body-base text-on-surface-variant leading-loose">
+            <p>@Model.Description</p>
+        </div>
+    </section>
+
+    <section class="mt-xl pt-xl border-t border-slate-200">
+        <h2 class="font-headline-md text-headline-md mb-lg">
+            Đánh giá khách hàng
+        </h2>
+
+        <div class="space-y-lg">
+            <div class="p-lg bg-surface-container-low rounded-xl border border-slate-100">
+                <div class="flex justify-between items-start mb-md">
+                    <div>
+                        <span class="font-label-bold text-body-base block">Nguyễn Văn A</span>
+
+                        <div class="flex text-tertiary-container text-sm">
+                            <span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL';">star</span>
+                            <span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL';">star</span>
+                            <span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL';">star</span>
+                            <span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL';">star</span>
+                            <span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL';">star</span>
+                        </div>
+                    </div>
+
+                    <span class="text-body-sm text-secondary">2 ngày trước</span>
+                </div>
+
+                <p class="text-body-base text-on-surface-variant italic">
+                    "Sản phẩm rất tốt, thời lượng pin thực tế còn cao hơn thông số công bố. Khả năng chống ồn hoạt động cực kỳ hiệu quả."
+                </p>
+            </div>
+
+            <div class="p-lg bg-surface-container-low rounded-xl border border-slate-100">
+                <div class="flex justify-between items-start mb-md">
+                    <div>
+                        <span class="font-label-bold text-body-base block">Trần Thị B</span>
+
+                        <div class="flex text-tertiary-container text-sm">
+                            <span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL';">star</span>
+                            <span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL';">star</span>
+                            <span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL';">star</span>
+                            <span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL';">star</span>
+                            <span class="material-symbols-outlined text-[18px]">star</span>
+                        </div>
+                    </div>
+
+                    <span class="text-body-sm text-secondary">1 tuần trước</span>
+                </div>
+
+                <p class="text-body-base text-on-surface-variant italic">
+                    "Chất lượng âm thanh rất tốt. Sản phẩm hơi nặng khi sử dụng trong thời gian dài nhưng tổng thể vẫn rất ổn."
+                </p>
+            </div>
+        </div>
+
+        
+    </section>
+
+    <partial name="_RelatedProducts" model="Model.RelatedProducts" />
+</main>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".thumbnail-box").forEach(function (box) {
+            box.addEventListener("click", function () {
+                const targetId = this.dataset.target;
+                const target = document.getElementById(targetId);
+
+                if (!target) return;
+
+                target.scrollIntoView({
+                    behavior: "smooth",
+                    inline: "start",
+                    block: "nearest"
+                });
+            });
+        });
+    });
+</script>
+
+<script>
+    const variants = @Html.Raw(JsonSerializer.Serialize(Model.Variants!
+        .Where(v => v != null)
+        .Select(v => new {
+            Id = v.Id,
+            Color = v.Color != null ? v.Color.ToString() : "",
+            Size = v.Size != null ? v.Size.ToString() : ""
+        })
+        .ToList()));
+
+    let selectedColor = null;
+    let selectedSize = null;
+
+    const colorRadios = document.querySelectorAll('.color-option');
+    const sizeRadios = document.querySelectorAll('.size-option');
+
+    const selectedVariantInput = document.getElementById('selectedVariantId');
+    const quantityInput = document.getElementById('quantityInput');
+    const hiddenQuantity = document.getElementById('hiddenQuantity');
+    const decreaseQty = document.getElementById('decreaseQty');
+    const increaseQty = document.getElementById('increaseQty');
+    const form = document.getElementById('addToCartForm');
+
+    function normalize(value) {
+        return (value || '').toString().trim().toLowerCase();
+    }
+
+    function updateVariantId() {
+        const matchedVariant = variants.find(v =>
+            normalize(v.Color) === normalize(selectedColor) &&
+            normalize(v.Size) === normalize(selectedSize)
+        );
+
+        selectedVariantInput.value = matchedVariant ? matchedVariant.Id : '';
+    }
+
+        let lastCheckedSize = null;
+    let lastCheckedColor = null;
+
+    sizeRadios.forEach(radio => {
+        radio.addEventListener('click', function () {
+            if (lastCheckedSize === this) {
+                this.checked = false;
+                lastCheckedSize = null;
+                selectedSize = null;
+            } else {
+                lastCheckedSize = this;
+                selectedSize = this.dataset.size;
+            }
+
+            updateVariantId();
+        });
+    });
+
+    colorRadios.forEach(radio => {
+        radio.addEventListener('click', function () {
+            if (lastCheckedColor === this) {
+                this.checked = false;
+                lastCheckedColor = null;
+                selectedColor = null;
+            } else {
+                lastCheckedColor = this;
+                selectedColor = this.dataset.color;
+            }
+
+            updateVariantId();
+        });
+    });
+
+    function syncQuantity() {
+        let qty = parseInt(quantityInput.value, 10);
+
+        if (isNaN(qty) || qty < 1) {
+            qty = 1;
+        }
+
+        quantityInput.value = qty;
+        hiddenQuantity.value = qty;
+    }
+
+    quantityInput.addEventListener('input', syncQuantity);
+
+    decreaseQty.addEventListener('click', function () {
+        quantityInput.value = parseInt(quantityInput.value || 1) - 1;
+        syncQuantity();
+    });
+
+    increaseQty.addEventListener('click', function () {
+        quantityInput.value = parseInt(quantityInput.value || 1) + 1;
+        syncQuantity();
+    });
+
+    form.addEventListener('submit', function (e) {
+        syncQuantity();
+
+        if (!selectedSize) {
+            e.preventDefault();
+            alert('Vui lòng chọn size');
+            return;
+        }
+
+        if (!selectedColor) {
+            e.preventDefault();
+            alert('Vui lòng chọn màu');
+            return;
+        }
+
+        if (!selectedVariantInput.value) {
+            e.preventDefault();
+            alert('Biến thể không hợp lệ');
+            return;
+        }
+    });
+
+    syncQuantity();
+</script>
+<script>
+    setTimeout(function () {
+        const toast = document.getElementById('toastMessage');
+
+        if (toast) {
+            toast.remove();
+        }
+    }, 2500);
+</script>

@@ -1,0 +1,208 @@
+﻿@model Demo_web_MVC.Models.ViewModel.Dashboard.ProductsManagerViewModel
+
+    <!-- SideNavBar -->
+    
+    
+    <!-- Main Content -->
+        <div class="space-y-lg">
+            <!-- Content Header -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-md mb-xl">
+                <div>
+                    <h3 class="font-headline-md text-headline-md text-on-surface">Danh sách hàng hóa</h3>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant">Cập nhật và quản lý kho hàng của bạn một cách dễ dàng.</p>
+                </div>
+                <a asp-action="CreateProduct"
+                   asp-controller="Seller" class="flex items-center gap-sm bg-primary-container text-on-primary font-label-bold text-label-bold py-3 px-lg rounded-lg shadow-[0px_4px_12px_rgba(0,174,239,0.2)] hover:-translate-y-1 transition-all duration-200">
+                    <span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+                    THÊM SẢN PHẨM
+                </a>
+            </div>
+    <!-- Dashboard Stats Summary (Bento Grid Style) -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-lg mt-xl">
+        <div class="bg-surface-container-lowest p-lg rounded-xl border border-surface-container-high shadow-[0px_4px_12px_rgba(0,0,0,0.05)] flex items-center gap-md">
+            <div class="w-12 h-12 rounded-full bg-primary-container/10 flex items-center justify-center text-primary-container">
+                <span class="material-symbols-outlined" data-icon="inventory_2" style="font-variation-settings: 'FILL' 1;">inventory_2</span>
+            </div>
+            <div>
+                <p class="text-label-bold font-label-bold text-outline uppercase tracking-wider">Tổng sản phẩm</p>
+                <p class="text-price-lg font-price-lg text-on-surface">@ViewBag.TotalProducts</p>
+            </div>
+        </div>
+        <div class="bg-surface-container-lowest p-lg rounded-xl border border-surface-container-high shadow-[0px_4px_12px_rgba(0,0,0,0.05)] flex items-center gap-md">
+            <div class="w-12 h-12 rounded-full bg-tertiary-container/10 flex items-center justify-center text-tertiary-container">
+                <span class="material-symbols-outlined" data-icon="shopping_cart" style="font-variation-settings: 'FILL' 1;">shopping_cart</span>
+            </div>
+            <div>
+                <p class="text-label-bold font-label-bold text-outline uppercase tracking-wider">Đơn hàng mới</p>
+                <p class="text-price-lg font-price-lg text-on-surface">15</p>
+            </div>
+        </div>
+        <div class="bg-surface-container-lowest p-lg rounded-xl border border-surface-container-high shadow-[0px_4px_12px_rgba(0,0,0,0.05)] flex items-center gap-md">
+            <div class="w-12 h-12 rounded-full bg-error/10 flex items-center justify-center text-error">
+                <span class="material-symbols-outlined" data-icon="warning" style="font-variation-settings: 'FILL' 1;">warning</span>
+            </div>
+            <div>
+                <p class="text-label-bold font-label-bold text-outline uppercase tracking-wider">Sắp hết hàng</p>
+                <p class="text-price-lg font-price-lg text-on-surface">@ViewBag.LowStockProducts</p>
+            </div>
+        </div>
+    </div>
+            <!-- Product Table Container -->
+            <div class="bg-surface-container-lowest rounded-xl shadow-[0px_4px_12px_rgba(0,0,0,0.05)] overflow-hidden border border-surface-container-high">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-surface-container-low border-b border-surface-container-high">
+                            <th class="px-lg py-md font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider">Ảnh</th>
+                            <th class="px-lg py-md font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider">Tên sản phẩm</th>
+                            <th class="px-lg py-md font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider text-right">Giá</th>
+                            <th class="px-lg py-md font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider text-center">Tồn kho</th>
+                            <th class="px-lg py-md font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider text-center">Trạng thái</th>
+                            <th class="px-lg py-md font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider text-right">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-surface-container-high">
+                        @foreach (var item in Model.Products.Items)
+                        {
+                            <tr class="hover:bg-surface-bright transition-colors duration-150">
+                                <td class="px-lg py-md">
+                                    <div class="w-14 h-14 rounded-lg bg-surface-container overflow-hidden">
+                                        <img alt="Product 1" class="w-full h-full object-cover" data-alt="A professional product shot of a sleek, minimalist white ceramic watch"
+                                             src="@Url.Content(item.imageUrl.FirstOrDefault() ?? "/uploads/images/no-image.jpg")" />
+                                    </div>
+                                </td>
+                                <td class="px-lg py-md">
+                                    <p class="font-body-base font-bold text-on-surface">@item.Name</p>
+                                   
+                                </td>
+                                <td class="px-lg py-md text-right font-body-base font-bold text-primary">
+                                   @item.Variants!.FirstOrDefault()?.Price
+                                </td>
+                                <td class="px-lg py-md text-center font-body-base text-on-surface-variant">
+                                    @(item.Variants?.Sum(v => v.Stock) ?? 0)
+                                </td>
+                                <td class="px-lg py-md text-center">
+                                    <span class="px-3 py-1 rounded-full text-[11px] font-bold uppercase bg-primary-fixed text-on-primary-fixed-variant">Đang bán</span>
+                                </td>
+                                <td class="px-lg py-md text-right">
+                                    <div class="flex items-center justify-end gap-sm">
+                                        <form asp-action="Edit" asp-controller="Seller" asp-route-id="@item.Id" method="get">
+                                            <button class="p-xs text-on-surface-variant hover:text-primary transition-colors">
+                                                <span class="material-symbols-outlined" data-icon="edit">edit</span>
+                                            </button>
+                                        </form>
+
+                                        <form asp-action="DeleteProduct"
+                                              asp-controller="Seller"
+                                              asp-route-id="@item.Id"
+                                              method="post"
+                                              onsubmit="return confirm('Bạn có chắc muốn ẩn sản phẩm này không?');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="p-xs text-on-surface-variant hover:text-error transition-colors">
+                                                <span class="material-symbols-outlined" data-icon="delete">delete</span>
+                                            </button>
+                                        </form>
+                                        
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+
+                        
+                    </tbody>
+
+                </table>
+                
+            </div>
+            @if (Model.Products != null && Model.Products.TotalPages > 1)
+{
+    <div class="px-6 py-4 bg-surface-container-low border-t border-outline-variant flex items-center justify-between">
+
+        <div class="text-sm text-on-surface-variant">
+            Trang @Model.Products.PageIndex / @Model.Products.TotalPages
+        </div>
+
+        <div class="flex items-center gap-2">
+
+            @if (Model.Products.HasPreviousPage)
+            {
+                <button type="button"
+                        data-page="@(Model.Products.PageIndex - 1)"
+                        class="product-page-btn p-2 rounded-lg border border-outline-variant hover:bg-surface transition-colors">
+                    <span class="material-symbols-outlined text-[20px]">
+                        chevron_left
+                    </span>
+                </button>
+            }
+            else
+            {
+                <button type="button"
+                        disabled
+                        class="p-2 rounded-lg border border-outline-variant opacity-50 transition-colors">
+                    <span class="material-symbols-outlined text-[20px]">
+                        chevron_left
+                    </span>
+                </button>
+            }
+
+            @for (int i = 1; i <= Model.Products.TotalPages; i++)
+            {
+                var activeClass = i == Model.Products.PageIndex
+                    ? "bg-primary text-on-primary"
+                    : "hover:bg-surface-container-high";
+
+                <button type="button"
+                        data-page="@i"
+                        class="product-page-btn w-8 h-8 rounded-lg font-label-md text-label-md flex items-center justify-center transition-colors @activeClass">
+                    @i
+                </button>
+            }
+
+            @if (Model.Products.HasNextPage)
+            {
+                <button type="button"
+                        data-page="@(Model.Products.PageIndex + 1)"
+                        class="product-page-btn p-2 rounded-lg border border-outline-variant hover:bg-surface transition-colors">
+                    <span class="material-symbols-outlined text-[20px]">
+                        chevron_right
+                    </span>
+                </button>
+            }
+            else
+            {
+                <button type="button"
+                        disabled
+                        class="p-2 rounded-lg border border-outline-variant opacity-50 transition-colors">
+                    <span class="material-symbols-outlined text-[20px]">
+                        chevron_right
+                    </span>
+                </button>
+            }
+
+        </div>
+    </div>
+}
+        </div>
+    
+
+@section Scripts {
+    <script>
+        document.addEventListener("click", function (e) {
+            const btn = e.target.closest(".product-page-btn");
+
+            if (!btn) {
+                return;
+            }
+
+            const page = btn.getAttribute("data-page");
+
+            if (!page) {
+                return;
+            }
+
+            const url = new URL(window.location.href);
+            url.searchParams.set("page", page);
+
+            window.location.href = url.toString();
+        });
+    </script>
+}

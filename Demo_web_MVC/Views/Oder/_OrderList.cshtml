@@ -1,0 +1,119 @@
+﻿@model List<Demo_web_MVC.Models.ViewModel.Oder.OderViewModel>
+
+@{
+    Layout = null;
+}
+
+@if (Model == null || !Model.Any())
+{
+    <div class="w-full bg-surface-container-lowest rounded-lg border border-outline-variant/30 p-lg text-center text-on-surface-variant">
+        Chưa có đơn hàng nào.
+    </div>
+}
+else
+{
+    foreach (var order in Model)
+    {
+        <div class="w-full bg-surface-container-lowest rounded-lg shadow-[0px_4px_12px_rgba(0,0,0,0.05)] border border-outline-variant/30 overflow-hidden hover:shadow-[0px_8px_24px_rgba(0,0,0,0.1)] transition-all group">
+
+            <!-- Header -->
+            <div class="px-lg py-md border-b border-outline-variant/20 flex flex-wrap justify-between items-center gap-md">
+                <div class="flex flex-wrap items-center gap-md">
+                    <span class="font-label-bold text-label-bold text-on-surface-variant uppercase">
+                        Mã đơn hàng:
+                        <span class="text-primary">@order.Id</span>
+                    </span>
+
+                    <span class="text-outline-variant">|</span>
+
+                    <span class="text-body-sm font-body-sm text-on-surface-variant">
+                        Ngày đặt: @(order.CreateAt?.ToString("dd/MM/yyyy HH:mm") ?? "")
+                    </span>
+                </div>
+
+                <div class="px-md py-xs rounded-full text-label-bold font-label-bold
+                            @(order.Status == OrderStatus.Completed ? "bg-green-100 text-green-700" :
+                                           order.Status == OrderStatus.Shipping ? "bg-primary-container text-primary" :
+                                           order.Status == OrderStatus.Pending ? "bg-error-container text-error" :
+                                           order.Status == OrderStatus.Cancelled ? "bg-tertiary-container text-tertiary" : "")">
+            @order.Status
+        </div>
+    </div>
+
+            <!-- Items -->
+            <div class="p-lg space-y-md">
+        @foreach (var item in order.Items)
+                {
+                    <div class="flex items-center gap-md">
+                        <div class="w-16 h-16 rounded-lg overflow-hidden border border-outline-variant/30 shrink-0">
+                            <img src="@item.Img"
+                                 alt="@item.Name"
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                        </div>
+
+                        <div class="flex-1 min-w-0 overflow-hidden">
+                            <h4 class="font-label-bold text-body-base text-on-surface truncate">
+                                @item.Name
+                            </h4>
+
+                            <div class="text-body-sm font-body-sm text-on-surface-variant">
+                                Số lượng: @item.Quantity
+                            </div>
+                        </div>
+
+                        <div class="w-[160px] text-right shrink-0">
+                            <span class="font-label-bold text-body-base text-primary">
+                                @string.Format("{0:N0}đ", item.Price)
+                            </span>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            
+            <div class="px-lg py-md bg-surface-container-low/50 flex flex-wrap justify-between items-center gap-md">
+                <div class="flex items-baseline gap-xs">
+                    <span class="text-body-sm font-body-sm text-on-surface-variant">
+                        Tổng tiền:
+                    </span>
+
+                    <span class="text-price-lg font-price-lg text-primary">
+                        @string.Format("{0:N0}đ", order.TotalAmount)
+                    </span>
+                </div>
+
+                <div class="flex flex-wrap gap-md">
+                    @if (order.Status == OrderStatus.Cancelled || order.Status == OrderStatus.Completed)
+                    {
+                        <button type="button"
+                                class="px-lg py-sm border border-primary text-primary rounded-lg font-label-bold text-label-bold hover:bg-primary-container/10 transition-all active:scale-95">
+                            Mua lại
+                        </button>
+                    }
+
+                    @if (order.Status == OrderStatus.Pending)
+                    {
+                        <form asp-action="CancelOrder"
+                              asp-controller="Oder"
+                              method="post"
+                              onsubmit="return confirm('Bạn có chắc muốn hủy đơn hàng này không?');">
+                            <input type="hidden" name="orderId" value="@order.Id" />
+
+                            <button type="submit"
+                                    class="px-lg py-sm border border-outline text-secondary rounded-lg font-label-bold text-label-bold hover:bg-surface-variant transition-all active:scale-95">
+                                Hủy đơn
+                            </button>
+                        </form>
+                    }
+
+                    <a asp-action="Details"
+                       asp-controller="Oder"
+                       asp-route-orderId="@order.Id"
+                       class="px-lg py-sm bg-primary-container text-on-primary-container rounded-lg font-label-bold text-label-bold hover:opacity-90 transition-all active:scale-95 shadow-sm no-underline">
+                        Xem chi tiết
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+}

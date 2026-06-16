@@ -1,0 +1,41 @@
+﻿@{
+    ViewData["Title"] = "Import sản phẩm từ Excel";
+}
+
+<div class="max-w-xl mx-auto bg-white p-6 rounded-xl shadow">
+    <h2 class="text-xl font-bold mb-4">Import sản phẩm từ Excel</h2>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="mb-4 text-red-600 font-medium">
+            @TempData["Error"]
+        </div>
+    }
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="mb-4 text-green-600 font-medium">
+            @TempData["Success"]
+        </div>
+    }
+
+    <form asp-action="ImportExcel"
+          asp-controller="Test"
+          method="post"
+          enctype="multipart/form-data">
+
+        <div class="mb-4">
+            <label class="block font-medium mb-2">Chọn file Excel</label>
+
+            <input type="file"
+                   name="excelFile"
+                   accept=".xlsx"
+                   class="block w-full border rounded-lg p-2" />
+        </div>
+
+        <button type="submit"
+                class="px-5 py-2 bg-blue-600 text-white rounded-lg">
+            Import sản phẩm
+        </button>
+    </form>
+</div>

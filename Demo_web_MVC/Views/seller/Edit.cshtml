@@ -1,0 +1,666 @@
+﻿
+@model Demo_web_MVC.Models.ViewModel.Product.ProductViewModel
+
+@{
+    ViewData["Title"] = "Chỉnh sửa sản phẩm";
+
+    var variants = Model.Variants ?? new List<Demo_web_MVC.Models.ViewModel.Product.ProductVariantsViewModel>();
+
+    string NormalizeImagePath(string? path, string folder)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return "/uploads/images/vidu.jpg";
+        }
+
+        if (path.StartsWith("/"))
+        {
+            return path;
+        }
+
+        return $"/uploads/{folder}/{path}";
+    }
+}
+
+<div class="space-y-lg">
+    <form asp-action="Edit"
+          asp-controller="Seller"
+          asp-route-id="@Model.Id"
+          enctype="multipart/form-data"
+          method="post">
+
+        <input type="hidden" asp-for="Id" />
+
+        <div class="flex justify-between items-end mb-lg">
+            <div>
+                <nav class="flex gap-xs text-[12px] text-on-surface-variant mb-xs">
+                    <span>Sản phẩm</span>
+                    <span>/</span>
+                    <span class="text-primary font-semibold">Chỉnh sửa</span>
+                </nav>
+
+                <h1 class="font-display-lg text-display-lg text-on-surface">
+                    Chỉnh sửa sản phẩm
+                </h1>
+            </div>
+
+            <div class="flex gap-md">
+                <a asp-action="ProductsManager"
+                   asp-controller="Seller"
+                   class="px-lg py-sm border border-primary text-primary rounded-lg font-label-bold text-label-bold hover:bg-primary-container/5 transition-colors">
+                    Hủy bỏ
+                </a>
+
+                <button class="px-lg py-sm bg-primary-container text-white rounded-lg font-label-bold text-label-bold shadow-md hover:shadow-lg hover:bg-primary transition-all flex items-center gap-sm"
+                        type="submit">
+                    <span class="material-symbols-outlined text-[18px]">save</span>
+                    Cập nhật sản phẩm
+                </button>
+            </div>
+        </div>
+
+        <div asp-validation-summary="All" class="text-error text-sm mb-md"></div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-lg">
+
+            <div class="lg:col-span-2 space-y-lg">
+
+                <section class="bg-surface-container-lowest rounded-lg p-lg shadow-[0px_4px_12px_rgba(0,0,0,0.05)] border border-outline-variant/30">
+                    <h2 class="font-headline-md text-headline-md mb-lg flex items-center gap-sm text-primary">
+                        <span class="material-symbols-outlined">info</span>
+                        Thông tin chung
+                    </h2>
+
+                    <div class="space-y-md">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+                            <div class="space-y-xs">
+                                <label asp-for="Name" class="font-label-bold text-label-bold text-on-surface-variant">
+                                    Tên sản phẩm *
+                                </label>
+
+                                <input asp-for="Name"
+                                       class="w-full px-md py-sm rounded-lg border border-outline-variant focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all text-body-base outline-none"
+                                       placeholder="Ví dụ: Áo thun Cotton Premium" />
+
+                                <span asp-validation-for="Name" class="text-error text-[12px]"></span>
+                            </div>
+
+                            <div class="space-y-xs">
+                                <label asp-for="Brand" class="font-label-bold text-label-bold text-on-surface-variant">
+                                    Thương hiệu
+                                </label>
+
+                                <input asp-for="Brand"
+                                       class="w-full px-md py-sm rounded-lg border border-outline-variant focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all text-body-base outline-none"
+                                       placeholder="Ví dụ: Nike, Adidas..." />
+
+                                <span asp-validation-for="Brand" class="text-error text-[12px]"></span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-xs">
+                            <label asp-for="CategoryId" class="font-label-bold text-label-bold text-on-surface-variant">
+                                Danh mục
+                            </label>
+
+                            <select asp-for="CategoryId"
+                                    class="w-full px-md py-sm rounded-lg border border-outline-variant focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all text-body-base outline-none">
+                                <option value="">-- Chọn danh mục --</option>
+
+                                @if (Model.Categories != null)
+                                {
+                                    foreach (var category in Model.Categories)
+                                    {
+                                        <option value="@category.Id">@category.Name</option>
+                                    }
+                                }
+                            </select>
+
+                            <span asp-validation-for="CategoryId" class="text-error text-[12px]"></span>
+                        </div>
+
+                        <div class="space-y-xs">
+                            <label asp-for="Description" class="font-label-bold text-label-bold text-on-surface-variant">
+                                Mô tả sản phẩm
+                            </label>
+
+                            <textarea asp-for="Description"
+                                      class="w-full p-md text-body-base outline-none resize-none border border-outline-variant rounded-lg"
+                                      placeholder="Nhập mô tả chi tiết cho sản phẩm..."
+                                      rows="6"></textarea>
+
+                            <span asp-validation-for="Description" class="text-error text-[12px]"></span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="bg-surface-container-lowest rounded-lg p-lg shadow-[0px_4px_12px_rgba(0,0,0,0.05)] border border-outline-variant/30">
+                    <div class="flex justify-between items-center mb-lg">
+                        <h2 class="font-headline-md text-headline-md flex items-center gap-sm text-primary">
+                            <span class="material-symbols-outlined">image</span>
+                            Hình ảnh sản phẩm
+                        </h2>
+
+                        <span class="text-body-sm text-on-surface-variant">
+                            Có thể chọn thêm nhiều ảnh mới.
+                        </span>
+                    </div>
+
+                    <div id="product-image-grid" class="grid grid-cols-2 md:grid-cols-4 gap-md">
+
+                        @if (Model.imageUrl != null && Model.imageUrl.Any())
+                        {
+                            foreach (var image in Model.imageUrl)
+                            {
+                                var imagePath = NormalizeImagePath(image, "products");
+
+                                <div class="existing-product-image relative aspect-square rounded-lg overflow-hidden border border-outline-variant bg-surface">
+                                    <img src="@Url.Content(imagePath)"
+                                         class="w-full h-full object-cover"
+                                         alt="Ảnh sản phẩm" />
+                                </div>
+                            }
+                        }
+
+                        <label id="product-upload-box"
+                               class="cursor-pointer aspect-square bg-surface-container-low border-2 border-dashed border-outline-variant rounded-lg flex flex-col items-center justify-center gap-xs hover:bg-surface-container-high hover:border-primary-container transition-all group">
+
+                            <input name="imageUrl"
+                                   id="image-upload"
+                                   type="file"
+                                   multiple
+                                   accept="image/*"
+                                   class="hidden"
+                                   onchange="previewProductImage(this)" />
+
+                            <span class="material-symbols-outlined text-[32px] text-on-surface-variant group-hover:text-primary">
+                                cloud_upload
+                            </span>
+
+                            <span class="font-label-bold text-label-bold text-on-surface-variant">
+                                Tải ảnh mới
+                            </span>
+                        </label>
+                    </div>
+
+                    <span asp-validation-for="imageUrl" class="text-error text-[12px]"></span>
+                </section>
+
+                <section class="bg-surface-container-lowest rounded-lg p-lg shadow-[0px_4px_12px_rgba(0,0,0,0.05)] border border-outline-variant/30">
+                    <div class="flex justify-between items-center mb-lg">
+                        <h2 class="font-headline-md text-headline-md flex items-center gap-sm text-primary">
+                            <span class="material-symbols-outlined">layers</span>
+                            Biến thể & Giá bán
+                        </h2>
+
+                        <button class="flex items-center gap-sm text-primary font-label-bold text-label-bold hover:underline"
+                                type="button"
+                                id="addVariantButton">
+                            <span class="material-symbols-outlined text-[18px]">add_circle</span>
+                            Thêm biến thể
+                        </button>
+                    </div>
+
+                    <div id="variants-body" class="space-y-md">
+                        @if (variants.Any())
+                        {
+                            for (int i = 0; i < variants.Count; i++)
+                            {
+                                var variant = variants[i];
+
+                                <div class="variant-card rounded-lg border border-outline-variant/60 bg-surface-container-lowest p-md shadow-sm">
+                                    <div class="flex justify-between items-center mb-md">
+                                        <h3 class="variant-title font-label-bold text-label-bold text-primary">
+                                            Biến thể #@(i + 1)
+                                        </h3>
+
+                                        <button type="button"
+                                                class="remove-variant text-on-surface-variant hover:text-error flex items-center gap-xs">
+                                            <span class="material-symbols-outlined text-[20px]">delete</span>
+                                            Xóa
+                                        </button>
+                                    </div>
+
+                                    <input type="hidden" name="Variants[@i].Id" value="@variant.Id" />
+                                    <input type="hidden" name="Variants[@i].ProductId" value="@variant.ProductId" />
+
+                                    <div class="space-y-sm mb-md">
+                                        <label class="font-label-bold text-label-bold text-on-surface-variant">
+                                            Ảnh biến thể
+                                        </label>
+
+                                        <div class="variant-image-grid grid grid-cols-2 md:grid-cols-4 gap-sm">
+
+                                            @if (variant.ImageUrlsVariants != null && variant.ImageUrlsVariants.Any())
+                                            {
+                                                foreach (var image in variant.ImageUrlsVariants)
+                                                {
+                                                    var variantImage = NormalizeImagePath(image, "variants");
+
+                                                    <div class="existing-variant-image relative aspect-square rounded-lg overflow-hidden border border-outline-variant bg-surface">
+                                                        <img src="@Url.Content(variantImage)"
+                                                             class="w-full h-full object-cover"
+                                                             alt="Ảnh biến thể" />
+                                                    </div>
+                                                }
+                                            }
+
+                                            <label class="variant-upload-box cursor-pointer aspect-square rounded-lg border-2 border-dashed border-outline-variant bg-surface-container-low flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:border-primary-container transition-all">
+                                                <input name="Variants[@i].ImageFiles"
+                                                       type="file"
+                                                       class="hidden variant-image-input"
+                                                       multiple
+                                                       accept="image/*"
+                                                       onchange="previewVariantImage(this)" />
+
+                                                <span class="material-symbols-outlined text-[28px]">add_a_photo</span>
+                                                <span class="text-[12px]">Tải ảnh lên</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 md:grid-cols-4 gap-md">
+                                        <div class="space-y-xs">
+                                            <label class="font-label-bold text-label-bold text-on-surface-variant">Size</label>
+                                            <input name="Variants[@i].Size"
+                                                   value="@variant.Size"
+                                                   class="w-full px-sm py-xs border border-outline-variant rounded bg-transparent focus:ring-1 focus:ring-primary-container outline-none text-body-sm"
+                                                   placeholder="S, M, L..." />
+                                        </div>
+
+                                        <div class="space-y-xs">
+                                            <label class="font-label-bold text-label-bold text-on-surface-variant">Màu sắc</label>
+                                            <input name="Variants[@i].Color"
+                                                   value="@variant.Color"
+                                                   class="w-full px-sm py-xs border border-outline-variant rounded bg-transparent focus:ring-1 focus:ring-primary-container outline-none text-body-sm"
+                                                   placeholder="Đen, Trắng..." />
+                                        </div>
+
+                                        <div class="space-y-xs">
+                                            <label class="font-label-bold text-label-bold text-on-surface-variant">Giá bán</label>
+                                            <input name="Variants[@i].Price"
+                                                   value="@variant.Price"
+                                                   class="w-full px-sm py-xs border border-outline-variant rounded bg-transparent focus:ring-1 focus:ring-primary-container outline-none font-label-bold"
+                                                   type="number"
+                                                   
+                                                   placeholder="Giá" />
+                                        </div>
+
+                                        <div class="space-y-xs">
+                                            <label class="font-label-bold text-label-bold text-on-surface-variant">Kho hàng</label>
+                                            <input name="Variants[@i].Stock"
+                                                   value="@variant.Stock"
+                                                   class="w-full px-sm py-xs border border-outline-variant rounded bg-transparent focus:ring-1 focus:ring-primary-container outline-none"
+                                                   type="number"
+                                                   placeholder="Kho" />
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="variant-card rounded-lg border border-outline-variant/60 bg-surface-container-lowest p-md shadow-sm">
+                                <div class="flex justify-between items-center mb-md">
+                                    <h3 class="variant-title font-label-bold text-label-bold text-primary">
+                                        Biến thể #1
+                                    </h3>
+
+                                    <button type="button"
+                                            class="remove-variant text-on-surface-variant hover:text-error flex items-center gap-xs">
+                                        <span class="material-symbols-outlined text-[20px]">delete</span>
+                                        Xóa
+                                    </button>
+                                </div>
+
+                                <div class="space-y-sm mb-md">
+                                    <label class="font-label-bold text-label-bold text-on-surface-variant">
+                                        Ảnh biến thể
+                                    </label>
+
+                                    <div class="variant-image-grid grid grid-cols-2 md:grid-cols-4 gap-sm">
+                                        <label class="variant-upload-box cursor-pointer aspect-square rounded-lg border-2 border-dashed border-outline-variant bg-surface-container-low flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:border-primary-container transition-all">
+                                            <input name="Variants[0].ImageFiles"
+                                                   type="file"
+                                                   class="hidden variant-image-input"
+                                                   multiple
+                                                   accept="image/*"
+                                                   onchange="previewVariantImage(this)" />
+
+                                            <span class="material-symbols-outlined text-[28px]">add_a_photo</span>
+                                            <span class="text-[12px]">Tải ảnh lên</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-4 gap-md">
+                                    <div class="space-y-xs">
+                                        <label class="font-label-bold text-label-bold text-on-surface-variant">Size</label>
+                                        <input name="Variants[0].Size"
+                                               class="w-full px-sm py-xs border border-outline-variant rounded bg-transparent focus:ring-1 focus:ring-primary-container outline-none text-body-sm"
+                                               placeholder="S, M, L..." />
+                                    </div>
+
+                                    <div class="space-y-xs">
+                                        <label class="font-label-bold text-label-bold text-on-surface-variant">Màu sắc</label>
+                                        <input name="Variants[0].Color"
+                                               class="w-full px-sm py-xs border border-outline-variant rounded bg-transparent focus:ring-1 focus:ring-primary-container outline-none text-body-sm"
+                                               placeholder="Đen, Trắng..." />
+                                    </div>
+
+                                    <div class="space-y-xs">
+                                        <label class="font-label-bold text-label-bold text-on-surface-variant">Giá bán</label>
+                                        <input name="Variants[0].Price"
+                                               class="w-full px-sm py-xs border border-outline-variant rounded bg-transparent focus:ring-1 focus:ring-primary-container outline-none font-label-bold"
+                                               type="number"
+                                               
+                                               placeholder="Giá" />
+                                    </div>
+
+                                    <div class="space-y-xs">
+                                        <label class="font-label-bold text-label-bold text-on-surface-variant">Kho hàng</label>
+                                        <input name="Variants[0].Stock"
+                                               class="w-full px-sm py-xs border border-outline-variant rounded bg-transparent focus:ring-1 focus:ring-primary-container outline-none"
+                                               type="number"
+                                               placeholder="Kho" />
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </section>
+            </div>
+
+            <div class="space-y-lg">
+                <section class="bg-primary/5 rounded-lg p-lg border border-primary/20">
+                    <h3 class="font-label-bold text-label-bold text-primary flex items-center gap-sm mb-xs">
+                        <span class="material-symbols-outlined text-[18px]">lightbulb</span>
+                        Lưu ý chỉnh sửa
+                    </h3>
+
+                    <p class="text-body-sm text-on-primary-container leading-relaxed">
+                        Có thể chỉnh sửa tên sản phẩm, thương hiệu, danh mục, mô tả, giá bán, tồn kho và biến thể.<br />
+                        Nếu muốn thêm ảnh sản phẩm hoặc ảnh biến thể, hãy bấm tải ảnh mới.<br />
+                        Ảnh cũ vẫn được giữ theo dữ liệu hiện có trong hệ thống.
+                    </p>
+                </section>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        let variantIndex = @((variants.Any()) ? variants.Count : 1);
+        let selectedProductImages = [];
+
+        function previewProductImage(input) {
+
+            if (!input.files || input.files.length === 0) return;
+
+            Array.from(input.files).forEach(file => {
+                selectedProductImages.push(file);
+            });
+
+            rebuildProductInputFiles();
+            renderProductImages();
+        }
+
+        function renderProductImages() {
+
+            const grid = document.getElementById("product-image-grid");
+            const uploadBox = document.getElementById("product-upload-box");
+
+            grid.querySelectorAll(".product-preview-item")
+                .forEach(item => item.remove());
+
+            selectedProductImages.forEach((file, index) => {
+
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+
+                    const item = document.createElement("div");
+
+                    item.className =
+                        "product-preview-item relative aspect-square rounded-lg overflow-hidden border border-outline-variant bg-surface";
+
+                    item.innerHTML = `
+                        <img src="${e.target.result}" class="w-full h-full object-cover" />
+
+                        <button type="button"
+                                onclick="removeProductImage(${index})"
+                                class="absolute top-1 right-1 w-7 h-7 rounded-full bg-red-500 text-white flex items-center justify-center text-sm">
+                            ×
+                        </button>
+                    `;
+
+                    grid.insertBefore(item, uploadBox);
+                };
+
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function removeProductImage(index) {
+
+            selectedProductImages.splice(index, 1);
+
+            rebuildProductInputFiles();
+            renderProductImages();
+        }
+
+        function rebuildProductInputFiles() {
+
+            const input = document.getElementById("image-upload");
+            const dataTransfer = new DataTransfer();
+
+            selectedProductImages.forEach(file => {
+                dataTransfer.items.add(file);
+            });
+
+            input.files = dataTransfer.files;
+        }
+
+        function previewVariantImage(input) {
+
+            if (!input.selectedFiles) {
+                input.selectedFiles = [];
+            }
+
+            Array.from(input.files).forEach(file => {
+                input.selectedFiles.push(file);
+            });
+
+            rebuildVariantInputFiles(input);
+            renderVariantImages(input);
+        }
+
+        function renderVariantImages(input) {
+
+            const card = input.closest(".variant-card");
+            const grid = card.querySelector(".variant-image-grid");
+            const uploadBox = card.querySelector(".variant-upload-box");
+
+            grid.querySelectorAll(".variant-preview-item")
+                .forEach(item => item.remove());
+
+            input.selectedFiles.forEach((file, index) => {
+
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+
+                    const item = document.createElement("div");
+
+                    item.className =
+                        "variant-preview-item relative aspect-square rounded-lg overflow-hidden border border-outline-variant bg-surface";
+
+                    item.innerHTML = `
+                        <img src="${e.target.result}" class="w-full h-full object-cover" />
+
+                        <button type="button"
+                                onclick="removeVariantImage(this, ${index})"
+                                class="absolute top-1 right-1 w-7 h-7 rounded-full bg-red-500 text-white flex items-center justify-center text-sm">
+                            ×
+                        </button>
+                    `;
+
+                    grid.insertBefore(item, uploadBox);
+                };
+
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function removeVariantImage(button, index) {
+
+            const card = button.closest(".variant-card");
+            const input = card.querySelector(".variant-image-input");
+
+            input.selectedFiles.splice(index, 1);
+
+            rebuildVariantInputFiles(input);
+            renderVariantImages(input);
+        }
+
+        function rebuildVariantInputFiles(input) {
+
+            const dataTransfer = new DataTransfer();
+
+            input.selectedFiles.forEach(file => {
+                dataTransfer.items.add(file);
+            });
+
+            input.files = dataTransfer.files;
+        }
+
+        document.getElementById("addVariantButton").addEventListener("click", function () {
+
+            const variantsBody = document.getElementById("variants-body");
+
+            const html = `
+                <div class="variant-card rounded-lg border border-outline-variant/60 bg-surface-container-lowest p-md shadow-sm">
+                    <div class="flex justify-between items-center mb-md">
+                        <h3 class="variant-title font-label-bold text-label-bold text-primary">
+                            Biến thể #${variantIndex + 1}
+                        </h3>
+
+                        <button type="button"
+                                class="remove-variant text-on-surface-variant hover:text-error flex items-center gap-xs">
+                            <span class="material-symbols-outlined text-[20px]">delete</span>
+                            Xóa
+                        </button>
+                    </div>
+
+                    <div class="space-y-sm mb-md">
+                        <label class="font-label-bold text-label-bold text-on-surface-variant">
+                            Ảnh biến thể
+                        </label>
+
+                        <div class="variant-image-grid grid grid-cols-2 md:grid-cols-4 gap-sm">
+                            <label class="variant-upload-box cursor-pointer aspect-square rounded-lg border-2 border-dashed border-outline-variant bg-surface-container-low flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:border-primary-container transition-all">
+                                <input name="Variants[${variantIndex}].ImageFiles"
+                                       type="file"
+                                       class="hidden variant-image-input"
+                                       multiple
+                                       accept="image/*"
+                                       onchange="previewVariantImage(this)" />
+
+                                <span class="material-symbols-outlined text-[28px]">add_a_photo</span>
+                                <span class="text-[12px]">Tải ảnh lên</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-md">
+                        <div class="space-y-xs">
+                            <label class="font-label-bold text-label-bold text-on-surface-variant">Size</label>
+                            <input name="Variants[${variantIndex}].Size"
+                                   class="w-full px-sm py-xs border border-outline-variant rounded bg-transparent focus:ring-1 focus:ring-primary-container outline-none text-body-sm"
+                                   placeholder="S, M, L..." />
+                        </div>
+
+                        <div class="space-y-xs">
+                            <label class="font-label-bold text-label-bold text-on-surface-variant">Màu sắc</label>
+                            <input name="Variants[${variantIndex}].Color"
+                                   class="w-full px-sm py-xs border border-outline-variant rounded bg-transparent focus:ring-1 focus:ring-primary-container outline-none text-body-sm"
+                                   placeholder="Đen, Trắng..." />
+                        </div>
+
+                        <div class="space-y-xs">
+                            <label class="font-label-bold text-label-bold text-on-surface-variant">Giá bán</label>
+                            <input name="Variants[${variantIndex}].Price"
+                                   class="w-full px-sm py-xs border border-outline-variant rounded bg-transparent focus:ring-1 focus:ring-primary-container outline-none font-label-bold"
+                                   type="number"
+                                   
+                                   placeholder="Giá" />
+                        </div>
+
+                        <div class="space-y-xs">
+                            <label class="font-label-bold text-label-bold text-on-surface-variant">Kho hàng</label>
+                            <input name="Variants[${variantIndex}].Stock"
+                                   class="w-full px-sm py-xs border border-outline-variant rounded bg-transparent focus:ring-1 focus:ring-primary-container outline-none"
+                                   type="number"
+                                   placeholder="Kho" />
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            variantsBody.insertAdjacentHTML("beforeend", html);
+            variantIndex++;
+        });
+
+        document.addEventListener("click", function (e) {
+
+            const removeButton = e.target.closest(".remove-variant");
+
+            if (!removeButton) return;
+
+            const cards = document.querySelectorAll(".variant-card");
+
+            if (cards.length <= 1) {
+                alert("Phải có ít nhất 1 biến thể sản phẩm.");
+                return;
+            }
+
+            removeButton.closest(".variant-card").remove();
+            reIndexVariants();
+        });
+
+        function reIndexVariants() {
+
+            const cards = document.querySelectorAll(".variant-card");
+
+            cards.forEach((card, index) => {
+
+                card.querySelector(".variant-title").innerText = `Biến thể #${index + 1}`;
+
+                const idInput = card.querySelector("input[name$='.Id']");
+                const productIdInput = card.querySelector("input[name$='.ProductId']");
+
+                if (idInput) {
+                    idInput.name = `Variants[${index}].Id`;
+                }
+
+                if (productIdInput) {
+                    productIdInput.name = `Variants[${index}].ProductId`;
+                }
+
+                card.querySelector(".variant-image-input").name = `Variants[${index}].ImageFiles`;
+                card.querySelector("input[name$='.Size']").name = `Variants[${index}].Size`;
+                card.querySelector("input[name$='.Color']").name = `Variants[${index}].Color`;
+                card.querySelector("input[name$='.Price']").name = `Variants[${index}].Price`;
+                card.querySelector("input[name$='.Stock']").name = `Variants[${index}].Stock`;
+            });
+
+            variantIndex = cards.length;
+        }
+    </script>
+}
+

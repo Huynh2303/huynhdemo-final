@@ -1,0 +1,42 @@
+﻿@model List<Demo_web_MVC.Models.ViewModel.Product.ProductViewModel>
+
+<section class="mt-xl pt-xl border-t border-slate-200">
+    <div class="flex justify-between items-end mb-lg">
+        <div>
+            <h2 class="font-headline-md text-headline-md">Sản phẩm liên quan</h2>
+            <p class="text-body-sm text-secondary">Hoàn thiện bộ sản phẩm của bạn</p>
+        </div>
+        <a class="text-primary-container font-label-bold" href="@Url.Action("Index", "Product")">Xem tất cả</a>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-gutter">
+        @foreach (var product in Model)
+        {
+            var price = product.Variants != null && product.Variants.Any()
+            ? product.Variants.Min(v => v.Price)
+            : 0;
+            <a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id">
+            <div class="group bg-white rounded-xl overflow-hidden shadow-[0px_4px_12px_rgba(0,0,0,0.05)] border border-slate-100 hover:-translate-y-1 hover:shadow-[0px_8px_24px_rgba(0,0,0,0.1)] transition-all">
+                <div class="relative aspect-square overflow-hidden">
+                    
+                        <img  alt="Earbuds" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="wireless earbuds in an open charging case on a vibrant blue background" src="@(product?.imageUrl != null && product.imageUrl.Any()
+                                                                                                                                                                                                                                    ? Url.Content(product.imageUrl.First())
+                                                                                                                                                                                                                                             : Url.Content("~/uploads/images/no-image.jpg"))" />
+                    
+                    <span class="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/80 backdrop-blur shadow-sm flex items-center justify-center text-secondary hover:text-error transition-colors">
+                        <span class="material-symbols-outlined text-sm">favorite</span>
+                    </span>
+                </div>
+                <div class="p-4">
+                    <span class="text-label-bold text-primary-container uppercase mb-1 block">@product!.Brand</span>
+                    <h3 class="font-label-bold text-body-sm text-on-background line-clamp-1 mb-2">@product.Name</h3>
+                    <div class="flex justify-between items-center">
+                        <span class="font-price-lg text-body-base text-on-background">
+                        @string.Format("{0:N0}đ", price)
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </a>
+        }
+    </div>
+</section>

@@ -1,0 +1,165 @@
+﻿@model Demo_web_MVC.Models.ViewModel.Product.ProductViewModel
+@using Microsoft.AspNetCore.Mvc.Rendering
+@using Demo_web_MVC.Models.ViewModel.Category
+
+@{
+    ViewData["Title"] = "Edit Product";
+    var categories = Model.Categories ?? new List<CategoryViewModel>();
+}
+
+<h2>Sửa sản phẩm</h2>
+
+<form asp-action="Edit" asp-controller="Product" method="post">
+    <input type="hidden" asp-for="Id" />
+
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label">Tên sản phẩm</label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="CategoryId" class="form-label">Danh mục</label>
+        <select asp-for="CategoryId" class="form-select"
+                asp-items="@(new SelectList(categories, "Id", "Name", Model.CategoryId))">
+            <option value="">-- Chọn danh mục --</option>
+        </select>
+        <span asp-validation-for="CategoryId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Brand" class="form-label">Thương hiệu</label>
+        <input asp-for="Brand" class="form-control" />
+        <span asp-validation-for="Brand" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Description" class="form-label">Mô tả</label>
+        <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <hr />
+    <h4>Biến thể sản phẩm</h4>
+
+    <table class="table table-bordered" id="variantTable">
+        <thead>
+            <tr>
+                <th>Size</th>
+                <th>Color</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th style="width: 100px;">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Variants != null && Model.Variants.Any())
+            {
+                for (int i = 0; i < Model.Variants.Count; i++)
+                {
+                    <tr>
+                        <td>
+                            <input type="hidden" name="Variants[@i].Id" value="@Model.Variants[i].Id" />
+                            <input type="hidden" name="Variants[@i].ProductId" value="@Model.Variants[i].ProductId" />
+                            <input type="text" name="Variants[@i].Size" value="@Model.Variants[i].Size" class="form-control" />
+                        </td>
+                        <td>
+                            <input type="text" name="Variants[@i].Color" value="@Model.Variants[i].Color" class="form-control" />
+                        </td>
+                        <td>
+                            <input type="number" step="0.01" name="Variants[@i].Price" value="@Model.Variants[i].Price" class="form-control" />
+                        </td>
+                        <td>
+                            <input type="number" name="Variants[@i].Stock" value="@Model.Variants[i].Stock" class="form-control" />
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-danger btn-sm remove-row">Xóa</button>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+
+    <button type="button" id="addVariant" class="btn btn-secondary mb-3">+ Thêm variant</button>
+
+    <div class="mt-3">
+        <button type="submit" class="btn btn-primary">Lưu</button>
+        <a asp-action="Index" asp-controller="Product" class="btn btn-outline-secondary">Quay lại</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        let variantIndex = @(Model.Variants != null ? Model.Variants.Count : 0);
+
+        document.getElementById("addVariant").addEventListener("click", function () {
+            const tableBody = document.querySelector("#variantTable tbody");
+
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>
+                    <input type="hidden" name="Variants[${variantIndex}].Id" value="0" />
+                    <input type="hidden" name="Variants[${variantIndex}].ProductId" value="@Model.Id" />
+                    <input type="text" name="Variants[${variantIndex}].Size" class="form-control" />
+                </td>
+                <td>
+                    <input type="text" name="Variants[${variantIndex}].Color" class="form-control" />
+                </td>
+                <td>
+                    <input type="number" step="0.01" name="Variants[${variantIndex}].Price" class="form-control" />
+                </td>
+                <td>
+                    <input type="number" name="Variants[${variantIndex}].Stock" class="form-control" />
+                </td>
+                <td>
+                    <button type="button" class="btn btn-danger btn-sm remove-row">Xóa</button>
+                </td>
+            `;
+
+            tableBody.appendChild(row);
+            variantIndex++;
+        });
+
+        document.addEventListener("click", function (e) {
+            if (e.target.classList.contains("remove-row")) {
+                e.target.closest("tr").remove();
+                reIndexVariantRows();
+            }
+        });
+
+        function reIndexVariantRows() {
+            const rows = document.querySelectorAll("#variantTable tbody tr");
+            variantIndex = 0;
+
+            rows.forEach((row) => {
+                const inputs = row.querySelectorAll("input");
+
+                inputs.forEach((input) => {
+                    if (input.name.includes(".Id")) {
+                        input.name = `Variants[${variantIndex}].Id`;
+                    }
+                    else if (input.name.includes(".ProductId")) {
+                        input.name = `Variants[${variantIndex}].ProductId`;
+                    }
+                    else if (input.name.includes(".Size")) {
+                        input.name = `Variants[${variantIndex}].Size`;
+                    }
+                    else if (input.name.includes(".Color")) {
+                        input.name = `Variants[${variantIndex}].Color`;
+                    }
+                    else if (input.name.includes(".Price")) {
+                        input.name = `Variants[${variantIndex}].Price`;
+                    }
+                    else if (input.name.includes(".Stock")) {
+                        input.name = `Variants[${variantIndex}].Stock`;
+                    }
+                });
+
+                variantIndex++;
+            });
+        }
+    </script>
+}

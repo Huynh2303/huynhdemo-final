@@ -1,0 +1,26 @@
+﻿@using Demo_web_MVC.Models
+@using Demo_web_MVC.Data.AppDatabase;
+@inject AppDatabase _context;
+
+@if (User.Identity?.IsAuthenticated == true)
+{
+
+    <h3>Hello</h3>
+    <span> 
+        @User.Claims.FirstOrDefault(c => c.Type == "FullName")?.Value
+    </span>
+    <a asp-action="Logout" asp-controller="User">Logout</a>
+    
+}
+else
+{
+    <ul  class="navbar-nav">
+        <li class="nav-item nav-link text-dark" >
+            <a asp-action="Login" asp-controller="User">Login</a>
+        </li>
+        <li class="nav-item nav-link text-dark" >
+            <a asp-action="Register" asp-controller="User">Register</a>
+        </li>
+    </ul>
+}
+

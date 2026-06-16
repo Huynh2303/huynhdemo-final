@@ -1,0 +1,805 @@
+﻿
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Admin Panel - Dashboard Overview</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/admin.css" />
+    <script id="tailwind-config" src="~/js/Admin-tailwind-config.js"></script>
+
+</head>
+
+<body class="bg-background text-on-surface">
+
+    <!-- Sidebar -->
+    <aside class="fixed left-0 top-0 h-full w-[280px] bg-surface border-r border-outline-variant flex flex-col py-stack-lg z-50">
+
+        <div class="px-6 mb-10 flex items-center gap-3">
+            <div class="w-10 h-10 bg-primary-container rounded-lg flex items-center justify-center text-on-primary-container">
+                <span class="material-symbols-outlined">admin_panel_settings</span>
+            </div>
+
+            <div>
+                <h1 class="font-headline-sm text-headline-sm font-bold text-primary">
+                    Admin Panel
+                </h1>
+                <p class="font-label-sm text-label-sm text-on-surface-variant opacity-70">
+                    Quản lý thương mại điện tử
+                </p>
+            </div>
+        </div>
+
+        <nav class="flex-1 px-4 space-y-1">
+
+            <a href="#"
+               data-target="Dashboard"
+               class="admin-menu bg-secondary-fixed text-primary border-l-4 border-primary px-4 py-3 rounded-r-lg flex items-center gap-3 cursor-pointer transition-colors duration-200 no-underline">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span class="font-label-md text-label-md">Tổng quan</span>
+            </a>
+
+            <a href="#"
+               data-target="Products"
+               class="admin-menu text-on-surface-variant hover:bg-surface-container-low px-4 py-3 rounded-lg flex items-center gap-3 cursor-pointer transition-all no-underline">
+                <span class="material-symbols-outlined">inventory_2</span>
+                <span class="font-label-md text-label-md">Sản phẩm</span>
+            </a>
+
+            <a href="#"
+               data-target="Orders"
+               class="admin-menu text-on-surface-variant hover:bg-surface-container-low px-4 py-3 rounded-lg flex items-center gap-3 cursor-pointer transition-all no-underline">
+                <span class="material-symbols-outlined">shopping_cart</span>
+                <span class="font-label-md text-label-md">Đơn hàng</span>
+            </a>
+
+            <a href="#"
+               data-target="Users"
+               class="admin-menu text-on-surface-variant hover:bg-surface-container-low px-4 py-3 rounded-lg flex items-center gap-3 cursor-pointer transition-all no-underline">
+                <span class="material-symbols-outlined">group</span>
+                <span class="font-label-md text-label-md">Người dùng</span>
+            </a>
+
+            <a href="#"
+               data-target="Categories"
+               class="admin-menu text-on-surface-variant hover:bg-surface-container-low px-4 py-3 rounded-lg flex items-center gap-3 cursor-pointer transition-all no-underline">
+                <span class="material-symbols-outlined">category</span>
+                <span class="font-label-md text-label-md">Danh mục</span>
+            </a>
+
+        </nav>
+    </aside>
+
+    <!-- Header -->
+    <header class="fixed top-0 right-0 left-[280px] h-16 bg-surface border-b border-outline-variant shadow-sm flex justify-between items-center px-margin-desktop z-40">
+
+        <div class="flex items-center gap-4 flex-1">
+            <div class="relative w-full max-w-md">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">
+                    search
+                </span>
+
+                <input class="w-full pl-10 pr-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all font-body-sm text-body-sm"
+                       placeholder="Search orders, users..."
+                       type="text" />
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-low text-on-surface-variant transition-colors relative">
+                <span class="material-symbols-outlined">notifications</span>
+                <span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
+            </button>
+
+            <button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-low text-on-surface-variant transition-colors">
+                <span class="material-symbols-outlined">settings</span>
+            </button>
+        </div>
+
+    </header>
+
+    <!-- Main -->
+    <main id="admin-content" class="ml-[280px] pt-16 min-h-screen p-8">
+        @RenderBody()
+    </main>
+    <!-- Modal -->
+    <div id="admin-modal"
+         class="fixed inset-0 bg-black/40 z-50 hidden items-center justify-center p-6">
+
+        <div class="bg-white rounded-3xl w-full max-w-6xl max-h-[90vh] overflow-y-auto relative">
+
+            <button id="close-admin-modal"
+                    class="absolute top-4 right-4 p-2 rounded-full hover:bg-surface-container-low">
+
+                <span class="material-symbols-outlined">
+                    close
+                </span>
+            </button>
+
+            <div id="admin-modal-content"></div>
+
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const mainContent = document.getElementById('admin-content');
+            const modal = document.getElementById('admin-modal');
+            const modalContent = document.getElementById('admin-modal-content');
+
+            // =========================
+            // HÀM DÙNG CHUNG
+            // =========================
+
+            function loadAdminContent(url) {
+                fetch(url)
+                    .then(r => r.text())
+                    .then(html => mainContent.innerHTML = html)
+                    .catch(err => {
+                        console.error(err);
+                        mainContent.innerHTML =
+                            '<p class="text-red-500">Không tải được nội dung admin.</p>';
+                    });
+            }
+
+            function openAdminModal(url) {
+                fetch(url)
+                    .then(r => r.text())
+                    .then(html => {
+                        modalContent.innerHTML = html;
+                        modal.classList.remove('hidden');
+                        modal.classList.add('flex');
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        alert('Không tải được dữ liệu.');
+                    });
+            }
+
+            function closeAdminModal() {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                modalContent.innerHTML = '';
+            }
+
+            function postAndReload(url, formData = null) {
+                fetch(url, {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(r => r.text())
+                    .then(html => mainContent.innerHTML = html)
+                    .catch(err => {
+                        console.error(err);
+                        alert('Thao tác thất bại.');
+                    });
+            }
+
+            // =========================
+            // SIDEBAR MENU
+            // =========================
+
+            const adminRoutes = {
+                Dashboard: '/Admin/Dashboard',
+                Products: '/Admin/ProductManagement',
+                Orders: '/Admin/OrderManagement',
+                Users: '/Admin/UserManagement',
+                Categories: '/Admin/CategoryManagement'
+            };
+
+            function setActiveMenu(item) {
+                document.querySelectorAll('.admin-menu[data-target]').forEach(a => {
+                    a.classList.remove(
+                        'bg-secondary-fixed',
+                        'text-primary',
+                        'border-l-4',
+                        'border-primary',
+                        'rounded-r-lg'
+                    );
+
+                    a.classList.add(
+                        'text-on-surface-variant',
+                        'rounded-lg'
+                    );
+                });
+
+                item.classList.add(
+                    'bg-secondary-fixed',
+                    'text-primary',
+                    'border-l-4',
+                    'border-primary',
+                    'rounded-r-lg'
+                );
+
+                item.classList.remove(
+                    'text-on-surface-variant',
+                    'rounded-lg'
+                );
+            }
+
+            document.querySelectorAll('.admin-menu[data-target]').forEach(item => {
+                item.addEventListener('click', e => {
+                    e.preventDefault();
+
+                    const url = adminRoutes[item.dataset.target];
+
+                    if (!url) {
+                        console.warn('Menu admin chưa cấu hình:', item.dataset.target);
+                        return;
+                    }
+
+                    setActiveMenu(item);
+                    loadAdminContent(url);
+                });
+            });
+
+            // =========================
+            // CLICK TRONG PARTIAL ADMIN
+            // =========================
+
+            mainContent.addEventListener('click', e => {
+
+                // PHÂN TRANG
+                const paging = e.target.closest(
+                    '.category-page-btn, .order-page-btn, .product-page-btn, .user-page-btn'
+                );
+
+                if (paging) {
+                    const page = paging.dataset.page;
+
+                    if (paging.classList.contains('category-page-btn')) {
+                        loadAdminContent(`/Admin/CategoryManagement?page=${page}`);
+                    }
+
+                    if (paging.classList.contains('order-page-btn')) {
+                        loadAdminContent(`/Admin/OrderManagement?page=${page}`);
+                    }
+
+                    if (paging.classList.contains('product-page-btn')) {
+                        loadAdminContent(`/Admin/ProductManagement?page=${page}`);
+                    }
+
+                    if (paging.classList.contains('user-page-btn')) {
+                        loadAdminContent(`/Admin/UserManagement?page=${page}`);
+                    }
+
+                    return;
+                }
+
+                // DASHBOARD
+                if (e.target.closest('#view-all-orders-btn')) {
+                    loadAdminContent('/Admin/OrderManagement');
+                    return;
+                }
+
+                // PRODUCT
+                const productDetail = e.target.closest('.product-detail-btn');
+                if (productDetail) {
+                    openAdminModal(`/Admin/ProductManagerDetail?id=${productDetail.dataset.productId}`);
+                    return;
+                }
+
+                const deleteProduct = e.target.closest('.delete-product-btn');
+                if (deleteProduct) {
+                    if (!confirm('Bạn có chắc muốn xóa sản phẩm này?')) {
+                        return;
+                    }
+
+                    postAndReload(`/Admin/DeleteProductByAdmin?productId=${deleteProduct.dataset.productId}`);
+                    return;
+                }
+
+                // ORDER
+                const orderDetail = e.target.closest('.order-detail-btn');
+                if (orderDetail) {
+                    openAdminModal(`/Admin/OrderDetailManagement?orderId=${orderDetail.dataset.orderId}`);
+                    return;
+                }
+
+                const confirmOrder = e.target.closest('.confirm-order-btn');
+                if (confirmOrder) {
+                    postAndReload(`/Admin/ConfirmOrder?orderId=${confirmOrder.dataset.orderId}`);
+                    return;
+                }
+
+                const cancelOrder = e.target.closest('.cancel-order-btn');
+                if (cancelOrder) {
+                    if (!confirm('Bạn có chắc muốn hủy đơn hàng này?')) {
+                        return;
+                    }
+
+                    postAndReload(`/Admin/CancelOrder?orderId=${cancelOrder.dataset.orderId}`);
+                    return;
+                }
+
+                const riskAnalysis = e.target.closest('.risk-analysis-btn');
+                if (riskAnalysis) {
+                    openAdminModal(`/Admin/OrderRiskAnalysis?orderId=${riskAnalysis.dataset.orderId}`);
+                    return;
+                }
+
+                const updateStatus = e.target.closest('.update-order-status-btn');
+                if (updateStatus) {
+                    openAdminModal(`/Admin/UpdateOrderStatusModal?orderId=${updateStatus.dataset.orderId}`);
+                    return;
+                }
+
+                // CATEGORY
+                const addCategory = e.target.closest('#open-add-category-btn');
+                if (addCategory) {
+                     openAdminModal('/Admin/AddCategory');
+                    return;
+                }
+
+                const editCategory = e.target.closest('.edit-category-btn');
+                if (editCategory) {
+                    openAdminModal(`/Admin/UpdateCategory?id=${editCategory.dataset.id}`);
+                    return;
+                }
+
+                const deleteCategory = e.target.closest('.delete-category-btn');
+                if (deleteCategory) {
+                    if (!confirm('Bạn có chắc muốn xóa danh mục này?')) {
+                        return;
+                    }
+
+                    const formData = new FormData();
+                    formData.append('categoryId', deleteCategory.dataset.id);
+
+                    postAndReload('/Admin/DeleteCategory', formData);
+                    return;
+                }
+                // USER STATUS
+                const updateUserStatus = e.target.closest('.update-user-status-btn');
+
+                if (updateUserStatus) {
+
+                    const formData = new FormData();
+
+                    formData.append('userId', updateUserStatus.dataset.userId);
+
+                    formData.append('isActive', updateUserStatus.dataset.isActive);
+
+                    postAndReload('/Admin/UpdateUserStatus', formData);
+
+                    return;
+                }
+               // CHANGE USER ROLE TO STAFF
+                const changeUserRole = e.target.closest('.change-user-role-btn');
+
+                if (changeUserRole) {
+
+                    if (!confirm('Bạn có chắc muốn cấp quyền Staff cho user này?')) {
+                        return;
+                    }
+
+                    const formData = new FormData();
+
+                    formData.append('userId', changeUserRole.dataset.userId);
+
+                    postAndReload('/Admin/ChangeUserToStaff', formData);
+
+                    return;
+                }
+            });
+
+            // =========================
+            // SUBMIT FORM TRONG MODAL
+            // =========================
+
+            modalContent.addEventListener('submit', e => {
+
+                // CATEGORY FORM
+                const categoryForm = e.target.closest('#category-form');
+                if (categoryForm) {
+                    e.preventDefault();
+
+                    const formData = new FormData(categoryForm);
+                    const id = formData.get('Id');
+
+                    const url = id
+                        ? '/Admin/UpdateCategory'
+                        : '/Admin/AddCategory';
+
+                    fetch(url, {
+                        method: 'POST',
+                        body: formData
+                    })
+                        .then(r => r.text())
+                        .then(html => {
+                            closeAdminModal();
+                            mainContent.innerHTML = html;
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            alert('Lưu danh mục thất bại.');
+                        });
+
+                    return;
+                }
+            });
+
+            // =========================
+            // CLICK TRONG MODAL
+            // =========================
+
+            modalContent.addEventListener('click', e => {
+
+                // CẬP NHẬT TRẠNG THÁI ORDER
+                const submitUpdateStatus = e.target.closest('#submit-update-order-status-btn');
+
+                if (submitUpdateStatus) {
+                    const orderId = submitUpdateStatus.dataset.orderId;
+                    const statusSelect = document.getElementById('update-order-status-select');
+
+                    if (!statusSelect) {
+                        alert('Không tìm thấy trạng thái cần cập nhật.');
+                        return;
+                    }
+
+                    fetch(`/Admin/UpdateOrderStatus?orderId=${orderId}&newStatus=${statusSelect.value}`, {
+                        method: 'POST'
+                    })
+                        .then(r => r.text())
+                        .then(html => {
+                            closeAdminModal();
+                            mainContent.innerHTML = html;
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            alert('Cập nhật trạng thái thất bại.');
+                        });
+
+                    return;
+                }
+            });
+
+            // =========================
+            // DROPDOWN 3 CHẤM ORDER
+            // =========================
+
+            document.addEventListener('click', e => {
+
+                const toggle = e.target.closest('.order-action-toggle');
+
+                if (toggle) {
+                    const menu = toggle
+                        .closest('.relative')
+                        .querySelector('.order-action-menu');
+
+                    document.querySelectorAll('.order-action-menu').forEach(m => {
+                        if (m !== menu) {
+                            m.classList.add('hidden');
+                        }
+                    });
+
+                    menu.classList.toggle('hidden');
+                    return;
+                }
+
+                if (!e.target.closest('.order-action-menu')) {
+                    document.querySelectorAll('.order-action-menu').forEach(menu => {
+                        menu.classList.add('hidden');
+                    });
+                }
+            });
+
+            // =========================
+            // ĐÓNG MODAL
+            // =========================
+
+            document.getElementById('close-admin-modal')
+                .addEventListener('click', closeAdminModal);
+
+            // =========================
+            // LOAD DASHBOARD MẶC ĐỊNH
+            // =========================
+
+            const defaultMenu = document.querySelector('.admin-menu[data-target="Dashboard"]');
+
+            if (defaultMenu) {
+                defaultMenu.click();
+            }
+        });
+    </script>
+    @* <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const mainContent = document.getElementById('admin-content');
+            const modal = document.getElementById('admin-modal');
+            const modalContent = document.getElementById('admin-modal-content');
+
+            // Load partial vào vùng content chính
+            function loadAdminContent(url) {
+                fetch(url)
+                    .then(r => r.text())
+                    .then(html => {
+                        mainContent.innerHTML = html;
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        mainContent.innerHTML =
+                            '<p class="text-red-500">Không tải được nội dung admin.</p>';
+                    });
+            }
+
+            // Load partial vào modal
+            function openAdminModal(url) {
+                fetch(url)
+                    .then(r => r.text())
+                    .then(html => {
+                        modalContent.innerHTML = html;
+                        modal.classList.remove('hidden');
+                        modal.classList.add('flex');
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        alert('Không tải được dữ liệu.');
+                    });
+            }
+
+            // Đóng modal
+            function closeAdminModal() {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                modalContent.innerHTML = '';
+            }
+
+            // POST xong reload lại partial chính
+            function postAndReload(url) {
+                fetch(url, { method: 'POST' })
+                    .then(r => r.text())
+                    .then(html => {
+                        mainContent.innerHTML = html;
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        alert('Thao tác thất bại.');
+                    });
+            }
+
+            // Active sidebar
+            function setActiveMenu(item) {
+                document.querySelectorAll('.admin-menu[data-target]').forEach(a => {
+                    a.classList.remove(
+                        'bg-secondary-fixed',
+                        'text-primary',
+                        'border-l-4',
+                        'border-primary',
+                        'rounded-r-lg'
+                    );
+
+                    a.classList.add(
+                        'text-on-surface-variant',
+                        'rounded-lg'
+                    );
+                });
+
+                item.classList.add(
+                    'bg-secondary-fixed',
+                    'text-primary',
+                    'border-l-4',
+                    'border-primary',
+                    'rounded-r-lg'
+                );
+
+                item.classList.remove(
+                    'text-on-surface-variant',
+                    'rounded-lg'
+                );
+            }
+
+            // Map menu sidebar với action admin
+            const adminRoutes = {
+                Dashboard: '/Admin/Dashboard',
+                Products: '/Admin/ProductManagement',
+                Orders: '/Admin/OrderManagement',
+                Users: '/Admin/UserManagement',
+                Categories: '/Admin/CategoryManagement'
+            };
+
+            // Click sidebar
+            document.querySelectorAll('.admin-menu[data-target]').forEach(item => {
+                item.addEventListener('click', e => {
+                    e.preventDefault();
+
+                    const target = item.dataset.target;
+                    const url = adminRoutes[target];
+
+                    if (!url) {
+                        console.warn('Menu admin chưa cấu hình:', target);
+                        return;
+                    }
+
+                    setActiveMenu(item);
+                    loadAdminContent(url);
+                });
+            });
+
+            // Các nút nằm trong nội dung partial
+            mainContent.addEventListener('click', e => {
+
+                // Phân trang
+                const paging = e.target.closest(
+                    '.category-page-btn, .order-page-btn, .product-page-btn, .user-page-btn'
+                );
+
+                if (paging) {
+                    const page = paging.dataset.page;
+
+                    if (paging.classList.contains('category-page-btn')) {
+                        loadAdminContent(`/Admin/CategoryManagement?page=${page}`);
+                    }
+
+                    if (paging.classList.contains('order-page-btn')) {
+                        loadAdminContent(`/Admin/OrderManagement?page=${page}`);
+                    }
+
+                    if (paging.classList.contains('product-page-btn')) {
+                        loadAdminContent(`/Admin/ProductManagement?page=${page}`);
+                    }
+
+                    if (paging.classList.contains('user-page-btn')) {
+                        loadAdminContent(`/Admin/UserManagement?page=${page}`);
+                    }
+
+                    return;
+                }
+
+                // Xem tất cả order từ dashboard
+                if (e.target.closest('#view-all-orders-btn')) {
+                    loadAdminContent('/Admin/OrderManagement');
+                    return;
+                }
+
+                // Detail modal
+                const orderDetail = e.target.closest('.order-detail-btn');
+                if (orderDetail) {
+                    openAdminModal(`/Admin/OrderDetailManagement?orderId=${orderDetail.dataset.orderId}`);
+                    return;
+                }
+
+                const productDetail = e.target.closest('.product-detail-btn');
+                if (productDetail) {
+                    openAdminModal(`/Admin/ProductManagerDetail?id=${productDetail.dataset.productId}`);
+                    return;
+                }
+
+                // Xóa product
+                const deleteProduct = e.target.closest('.delete-product-btn');
+                if (deleteProduct) {
+                    if (!confirm('Bạn có chắc muốn xóa sản phẩm này?')) {
+                        return;
+                    }
+
+                    postAndReload(`/Admin/DeleteProductByAdmin?productId=${deleteProduct.dataset.productId}`);
+                    return;
+                }
+
+                // Order actions
+                const confirmOrder = e.target.closest('.confirm-order-btn');
+                if (confirmOrder) {
+                    postAndReload(`/Admin/ConfirmOrder?orderId=${confirmOrder.dataset.orderId}`);
+                    return;
+                }
+
+                const cancelOrder = e.target.closest('.cancel-order-btn');
+                if (cancelOrder) {
+                    if (!confirm('Bạn có chắc muốn hủy đơn hàng này?')) {
+                        return;
+                    }
+
+                    postAndReload(`/Admin/CancelOrder?orderId=${cancelOrder.dataset.orderId}`);
+                    return;
+                }
+
+                const riskAnalysis = e.target.closest('.risk-analysis-btn');
+                if (riskAnalysis) {
+                    openAdminModal(`/Admin/OrderRiskAnalysis?orderId=${riskAnalysis.dataset.orderId}`);
+                    return;
+                }
+
+                const updateStatus = e.target.closest('.update-order-status-btn');
+                if (updateStatus) {
+                    openAdminModal(`/Admin/UpdateOrderStatusModal?orderId=${updateStatus.dataset.orderId}`);
+                    return;
+                }
+
+                const submitUpdateStatus = e.target.closest('#submit-update-order-status-btn');
+                if (submitUpdateStatus) {
+                    const orderId = submitUpdateStatus.dataset.orderId;
+                    const status = document.getElementById('update-order-status-select').value;
+
+                    fetch(`/Admin/UpdateOrderStatus?orderId=${orderId}&newStatus=${status}`, {
+                        method: 'POST'
+                    })
+                        .then(r => r.text())
+                        .then(html => {
+                            closeAdminModal();
+                            mainContent.innerHTML = html;
+                        });
+
+                    return;
+                }
+            });
+
+            // Dropdown 3 chấm của order
+            document.addEventListener('click', e => {
+
+                const toggle = e.target.closest('.order-action-toggle');
+
+                if (toggle) {
+                    const menu = toggle
+                        .closest('.relative')
+                        .querySelector('.order-action-menu');
+
+                    document.querySelectorAll('.order-action-menu').forEach(m => {
+                        if (m !== menu) {
+                            m.classList.add('hidden');
+                        }
+                    });
+
+                    menu.classList.toggle('hidden');
+                    return;
+                }
+
+                if (!e.target.closest('.order-action-menu')) {
+                    document.querySelectorAll('.order-action-menu').forEach(menu => {
+                        menu.classList.add('hidden');
+                    });
+                }
+            });
+                    // Submit cập nhật trạng thái trong modal
+            document.addEventListener('click', e => {
+
+                const submitUpdateStatus = e.target.closest('#submit-update-order-status-btn');
+
+                if (!submitUpdateStatus) {
+                    return;
+                }
+
+                const orderId = submitUpdateStatus.dataset.orderId;
+
+                const statusSelect = document.getElementById('update-order-status-select');
+
+                if (!statusSelect) {
+                    alert('Không tìm thấy trạng thái cần cập nhật.');
+                    return;
+                }
+
+                const status = statusSelect.value;
+
+                fetch(`/Admin/UpdateOrderStatus?orderId=${orderId}&newStatus=${status}`, {
+                    method: 'POST'
+                })
+                .then(r => r.text())
+                .then(html => {
+                    closeAdminModal();
+                    mainContent.innerHTML = html;
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Cập nhật trạng thái thất bại.');
+                });
+            });
+            // Nút đóng modal
+            document.getElementById('close-admin-modal')
+                .addEventListener('click', closeAdminModal);
+
+            // Load dashboard mặc định
+            const defaultMenu =
+                document.querySelector('.admin-menu[data-target="Dashboard"]');
+
+            if (defaultMenu) {
+                defaultMenu.click();
+            }
+        });
+    </script> *@
+</body>
+</html>

@@ -1,0 +1,184 @@
+﻿@* @model Demo_web_MVC.Models.ViewModel.Address.AddressViewModel
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Thêm Địa Chỉ Mới - VibrantShop</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@100;300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet" />
+    <!-- Load Tailwind Config -->
+    <script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary-fixed": "#e2e2e2",
+                      "on-primary-fixed": "#001e2d",
+                      "background": "#f5faff",
+                      "primary-fixed": "#c6e7ff",
+                      "error": "#ba1a1a",
+                      "surface-container": "#eaeef4",
+                      "on-secondary-fixed": "#1a1c1c",
+                      "on-primary-container": "#003e58",
+                      "tertiary-fixed": "#ffdcc0",
+                      "inverse-on-surface": "#ecf1f7",
+                      "tertiary-fixed-dim": "#ffb876",
+                      "tertiary-container": "#ea8c21",
+                      "secondary-container": "#dfe0e0",
+                      "on-secondary-fixed-variant": "#454747",
+                      "on-secondary": "#ffffff",
+                      "on-tertiary-fixed": "#2d1600",
+                      "on-tertiary": "#ffffff",
+                      "on-surface-variant": "#3e4850",
+                      "on-primary-fixed-variant": "#004c6b",
+                      "surface-container-low": "#eff4fa",
+                      "on-surface": "#171c20",
+                      "surface-tint": "#00658d",
+                      "primary-container": "#00aeef",
+                      "inverse-primary": "#82cfff",
+                      "on-background": "#171c20",
+                      "inverse-surface": "#2c3135",
+                      "surface-bright": "#f5faff",
+                      "outline-variant": "#bdc8d1",
+                      "outline": "#6e7881",
+                      "primary": "#00658d",
+                      "surface-container-lowest": "#ffffff",
+                      "error-container": "#ffdad6",
+                      "tertiary": "#8d4f00",
+                      "secondary-fixed-dim": "#c6c6c7",
+                      "on-secondary-container": "#616363",
+                      "surface-dim": "#d6dae0",
+                      "surface-container-highest": "#dee3e8",
+                      "on-tertiary-fixed-variant": "#6b3b00",
+                      "surface-container-high": "#e4e9ee",
+                      "on-tertiary-container": "#572f00",
+                      "surface-variant": "#dee3e8",
+                      "surface": "#f5faff",
+                      "primary-fixed-dim": "#82cfff",
+                      "on-error": "#ffffff",
+                      "secondary": "#5d5f5f",
+                      "on-primary": "#ffffff",
+                      "on-error-container": "#93000a"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "sm": "8px",
+                      "unit": "4px",
+                      "md": "16px",
+                      "xl": "48px",
+                      "lg": "24px",
+                      "gutter": "16px",
+                      "xs": "4px",
+                      "container-max": "1200px"
+              },
+              "fontFamily": {
+                      "display-lg": ["Be Vietnam Pro"],
+                      "headline-md": ["Be Vietnam Pro"],
+                      "body-base": ["Be Vietnam Pro"],
+                      "body-sm": ["Be Vietnam Pro"],
+                      "price-lg": ["Be Vietnam Pro"],
+                      "label-bold": ["Be Vietnam Pro"]
+              },
+              "fontSize": {
+                      "display-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                      "headline-md": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                      "body-base": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                      "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                      "price-lg": ["24px", {"lineHeight": "1", "fontWeight": "700"}],
+                      "label-bold": ["12px", {"lineHeight": "1.2", "letterSpacing": "0.02em", "fontWeight": "700"}]
+              }
+            },
+          },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .form-input-focus:focus {
+            border-color: #00aeef;
+            ring-color: #00aeef;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0, 174, 239, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-background font-body-base text-on-background min-h-screen flex flex-col">
+    
+    <main class="flex-grow pt-24 pb-xl px-4">
+        <div class="max-w-[1200px] mx-auto">
+            <!-- ASP.NET MVC Form Container -->
+            <!-- @@model Demo_web_MVC.Models.Address -->
+            <div class="max-w-[600px] mx-auto bg-surface-container-lowest p-8 rounded-lg shadow-[0px_4px_12px_rgba(0,0,0,0.05)] border border-slate-100">
+                <div class="mb-8 border-b border-slate-100 pb-4">
+                    <h1 class="text-headline-md font-display-lg text-on-surface">Thêm Địa Chỉ Mới</h1>
+                    <p class="text-body-sm text-outline mt-1">Vui lòng điền thông tin để nhận hàng chính xác nhất.</p>
+                </div>
+                <form asp-action="Create" asp-controller="Adress" class="space-y-lg" method="post">
+                    @Html.AntiForgeryToken()
+                    <!-- ASP.NET Anti-forgery Token would go here -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+                        <!-- RecipientName -->
+                        <div class="space-y-xs">
+                            <label class="text-label-bold text-on-surface-variant block" for="RecipientName">Tên người nhận</label>
+                            <input class="w-full px-md py-sm bg-surface-container-low border border-outline-variant rounded-lg font-body-base text-on-surface form-input-focus transition-all" id="RecipientName" asp-for="RecipientName" placeholder="VD: Nguyễn Văn A" type="text" />
+                            <!-- <span asp-validation-for="RecipientName" class="text-error text-xs font-medium"></span> -->
+                            <span class="text-error text-[12px] font-medium hidden">Vui lòng nhập tên người nhận</span>
+                        </div>
+                        <!-- PhoneNumber -->
+                        <div class="space-y-xs">
+                            <label class="text-label-bold text-on-surface-variant block" for="PhoneNumber">Số điện thoại</label>
+                            <input class="w-full px-md py-sm bg-surface-container-low border border-outline-variant rounded-lg font-body-base text-on-surface form-input-focus transition-all" id="PhoneNumber" asp-for="PhoneNumber" placeholder="09xx xxx xxx" type="text" />
+                            <!-- <span asp-validation-for="PhoneNumber" class="text-error text-xs font-medium"></span> -->
+                        </div>
+                    </div>
+                    <!-- AddressLine -->
+                    <div class="space-y-xs">
+                        <label class="text-label-bold text-on-surface-variant block" for="AddressLine">Địa chỉ cụ thể</label>
+                        <input class="w-full px-md py-sm bg-surface-container-low border border-outline-variant rounded-lg font-body-base text-on-surface form-input-focus transition-all" id="AddressLine" asp-for="AddressLine" placeholder="Số nhà, tên đường, phường/xã..." type="text" />
+                        <!-- <span asp-validation-for="AddressLine" class="text-error text-xs font-medium"></span> -->
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+                        <!-- City -->
+                        <div class="space-y-xs">
+                            <label class="text-label-bold text-on-surface-variant block" for="City">Thành phố</label>
+                            <input class="w-full px-md py-sm bg-surface-container-low border border-outline-variant rounded-lg font-body-base text-on-surface form-input-focus transition-all" id="City" asp-for="City" placeholder="VD: Hà Nội" type="text" />
+                        </div>
+                        <!-- Country -->
+                        <div class="space-y-xs">
+                            <label class="text-label-bold text-on-surface-variant block" for="Country">Quốc gia</label>
+                            <input class="w-full px-md py-sm bg-surface-container-low border border-outline-variant rounded-lg font-body-base text-on-surface form-input-focus transition-all" id="Country" asp-for="Country" type="text" value="Việt Nam" />
+                        </div>
+                    </div>
+                    <!-- IsDefault Checkbox -->
+                    <div class="flex items-center gap-sm pt-2">
+                        <div class="relative flex items-center">
+                            <input class="w-5 h-5 rounded border-outline-variant text-primary-container focus:ring-primary-container transition-all cursor-pointer" id="IsDefault" asp-for="IsDefault" type="checkbox" />
+                        </div>
+                        <label class="text-body-sm text-on-surface-variant cursor-pointer select-none" for="IsDefault">Đặt làm địa chỉ mặc định</label>
+                    </div>
+                    <!-- Buttons Container -->
+                    <div class="flex flex-col md:flex-row gap-md pt-lg">
+                        <button class="flex-1 bg-primary-container text-white font-label-bold text-[14px] py-md rounded-lg shadow-sm hover:brightness-110 active:scale-[0.98] transition-all uppercase tracking-wide" type="submit">
+                            Lưu địa chỉ
+                        </button>
+                        <a class="flex-1 border border-outline-variant text-on-surface-variant font-label-bold text-[14px] py-md rounded-lg hover:bg-slate-50 transition-all text-center uppercase tracking-wide" href="/Adress/Index/">
+                            Hủy
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</body>
+</html> *@

@@ -1,0 +1,55 @@
+﻿@model Demo_web_MVC.Models.ViewModel.Product.ProductViewModel
+
+@{
+    ViewData["Title"] = "Thêm mới sản phẩm";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<form asp-action="Create" method="post" enctype="multipart/form-data">
+    <div class="form-group">
+        <label asp-for="Name" class="control-label">Tên sản phẩm</label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Description" class="control-label">Mô tả sản phẩm</label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Brand" class="control-label">Thương hiệu</label>
+        <input asp-for="Brand" class="form-control" />
+        <span asp-validation-for="Brand" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="CategoryId" class="control-label">Danh mục</label>
+        <select asp-for="CategoryId" class="form-control">
+            <option value="">-- Chọn danh mục --</option>
+            @* Giả sử bạn có danh sách danh mục từ Model hoặc ViewData *@
+            @foreach (var category in Model.Categories!)
+            {
+                <option value="@category.Id">@category.Name</option>
+            }
+        </select>
+        <span asp-validation-for="CategoryId" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="imageUrl" class="control-label">Hình ảnh sản phẩm</label>
+        <input asp-for="imageUrl" type="file" class="form-control"  />
+        <span asp-validation-for="imageUrl" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Lưu</button>
+</form>
+
+<!-- Hiển thị lỗi nếu có -->
+<div asp-validation-summary="All" class="text-danger"></div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

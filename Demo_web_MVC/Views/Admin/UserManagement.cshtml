@@ -1,0 +1,210 @@
+﻿@model Demo_web_MVC.Models.ViewModel.Admin.UserManagementViewModel
+
+<div class="max-w-[1440px] mx-auto p-margin-desktop space-y-10">
+
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+            <h2 class="font-headline-lg text-headline-lg text-on-surface">Quản lý người dùng</h2>
+            <p class="font-body-md text-body-md text-on-surface-variant mt-1">
+                Quản lý tài khoản và phân quyền người dùng.
+            </p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/30 flex items-center gap-4">
+            <div class="w-12 h-12 bg-primary-fixed rounded-xl flex items-center justify-center text-primary">
+                <span class="material-symbols-outlined">group</span>
+            </div>
+            <div>
+                <p class="font-label-sm text-label-sm text-on-surface-variant">Tổng người dùng</p>
+                <p class="font-headline-md text-headline-md text-on-surface">@Model.TotalUsers</p>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/30 flex items-center gap-4">
+            <div class="w-12 h-12 bg-primary-fixed rounded-xl flex items-center justify-center text-primary">
+                <span class="material-symbols-outlined">verified_user</span>
+            </div>
+            <div>
+                <p class="font-label-sm text-label-sm text-on-surface-variant">Người dùng hoạt động</p>
+                <p class="font-headline-md text-headline-md text-on-surface">@Model.ActiveUsers</p>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/30 flex items-center gap-4">
+            <div class="w-12 h-12 bg-error-container rounded-xl flex items-center justify-center text-error">
+                <span class="material-symbols-outlined">lock</span>
+            </div>
+            <div>
+                <p class="font-label-sm text-label-sm text-on-surface-variant">Tài khoản bị khóa</p>
+                <p class="font-headline-md text-headline-md text-on-surface">@Model.LockedUsers</p>
+            </div>
+        </div>
+    </div>
+
+    <section class="space-y-4">
+        
+
+        <div class="bg-white rounded-2xl shadow-sm border border-outline-variant/30 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-surface-container-low">
+                            <th class="px-6 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase">Tên người dùng</th>
+                            <th class="px-6 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase">Email</th>
+                            <th class="px-6 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase">Vai trò</th>
+                            <th class="px-6 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase">Trạng thái</th>
+                            <th class="px-6 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase text-right">Quền</th>
+                            <th class="px-6 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase text-right">Thao tác</th>
+                        </tr>
+                    </thead>
+
+                    <tbody class="divide-y divide-outline-variant/20">
+                        @if (Model.Users != null && Model.Users.Items.Any())
+                        {
+                            foreach (var user in Model.Users.Items)
+                            {
+                                var displayName = !string.IsNullOrWhiteSpace(user.FullName)
+                                ? user.FullName
+                                : user.Username;
+
+                                var firstChar = !string.IsNullOrWhiteSpace(displayName)
+                                ? displayName.Substring(0, 1).ToUpper()
+                                : "U";
+
+                                <tr class="hover:bg-surface-container-lowest transition-colors">
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded-full bg-primary-fixed-dim text-primary flex items-center justify-center font-bold text-xs">
+                                                @firstChar
+                                            </div>
+                                            <span class="font-body-md text-body-md text-on-surface font-medium">
+                                                @displayName
+                                            </span>
+                                        </div>
+                                    </td>
+
+                                    <td class="px-6 py-4 font-body-md text-body-md text-on-surface-variant">
+                                        @user.Email
+                                    </td>
+
+                                    <td class="px-6 py-4">
+                                        <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary-fixed text-primary border border-primary/20">
+                                            @user.RoleName
+                                        </span>
+                                    </td>
+
+                                    <td class="px-6 py-4">
+                                        @if (user.IsLocked)
+                                        {
+                                            <span class="flex items-center gap-1.5 font-label-sm text-label-sm text-red-700">
+                                                <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                                                Locked
+                                            </span>
+                                        }
+                                        else if (user.IsActive)
+                                        {
+                                            <span class="flex items-center gap-1.5 font-label-sm text-label-sm text-green-700">
+                                                <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                                                Active
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="flex items-center gap-1.5 font-label-sm text-label-sm text-gray-600">
+                                                <span class="w-2 h-2 rounded-full bg-gray-400"></span>
+                                                Inactive
+                                            </span>
+                                        }
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        @if (user.RoleName == "USER"|| user.RoleName == "Customer"|| user.RoleName == "Người dùng")
+                                        {
+        
+                                        <button type="button"
+                                                title="Phân quyền Staff"
+                                                class="change-user-role-btn p-2 rounded-lg hover:bg-secondary-container/20 text-on-surface-variant hover:text-secondary transition-colors"
+                                                data-user-id="@user.Id">
+
+                                            <span class="material-symbols-outlined text-[20px]">
+                                                admin_panel_settings
+                                            </span>
+
+                                        </button>
+                                        }
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+
+                                        @if (user.IsActive)
+                                        {
+                                            <button type="button"
+                                                    class="update-user-status-btn px-4 py-1.5 rounded-lg border border-outline font-label-sm text-label-sm hover:bg-surface-container-low transition-all text-on-surface"
+                                                    data-user-id="@user.Id"
+                                                    data-is-active="false">
+
+                                                Lock
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <button type="button"
+                                                    class="update-user-status-btn px-4 py-1.5 rounded-lg border border-primary font-label-sm text-label-sm bg-primary text-on-primary hover:opacity-90 transition-all"
+                                                    data-user-id="@user.Id"
+                                                    data-is-active="true">
+
+                                                Unlock
+                                            </button>
+                                        }
+
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5" class="px-6 py-8 text-center text-on-surface-variant">
+                                    No users found.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <div class="pagination flex items-center gap-2">
+                @if (Model.Users != null && Model.Users.TotalPages > 1)
+                {
+                    <div class="flex items-center justify-between px-6 py-4 border-t border-outline-variant/20">
+                        <div class="font-body-sm text-body-sm text-on-surface-variant">
+                            Showing page @Model.Users.PageIndex of @Model.Users.TotalPages
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                                <button type="button"
+                                        data-page="@(Model.Users.PageIndex - 1)"
+                                        class="user-page-btn px-3 py-2 rounded-lg border border-outline text-on-surface @(Model.Users.HasPreviousPage ? "" : "pointer-events-none opacity-50")">
+                                    Previous
+                                </button>
+
+                            @for (int i = 1; i <= Model.Users.TotalPages; i++)
+                            {
+                                    <button type="button"
+                                            data-page="@i"
+                                            class="user-page-btn px-3 py-2 rounded-lg @(i == Model.Users.PageIndex ? "bg-primary text-on-primary" : "border border-outline text-on-surface hover:bg-surface-container-low")">
+                                        @i
+                                    </button>
+                            }
+
+                                <button type="button"
+                                        data-page="@(Model.Users.PageIndex + 1)"
+                                        class="user-page-btn px-3 py-2 rounded-lg border border-outline text-on-surface @(Model.Users.HasNextPage ? "" : "pointer-events-none opacity-50")">
+                                    Next
+                                </button>
+                        </div>
+                    </div>
+                }
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

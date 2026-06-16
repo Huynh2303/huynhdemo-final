@@ -1,0 +1,55 @@
+﻿@model List<Demo_web_MVC.Models.ViewModel.Chat.ChatDropdownViewModel>
+
+<div class="relative group">
+
+    <a asp-controller="Chat"
+       asp-action="Index"
+       class="relative inline-flex items-center justify-center w-10 h-10 rounded-full hover:bg-slate-100 transition">
+
+        <span class="material-symbols-outlined text-slate-700">
+            chat
+        </span>
+
+        <span class="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+    </a>
+
+    <div class="hidden group-hover:block absolute right-0 top-full pt-2 z-[99999]">
+
+        
+        <div class="absolute top-0 right-5 w-4 h-4 bg-white rotate-45 border-l border-t border-slate-200 z-10"></div>
+
+        <div class="w-[400px] bg-white border border-slate-200 shadow-xl rounded-lg">
+
+            <div class="p-4 border-b font-semibold">
+                Tin nhắn
+            </div>
+
+            @foreach (var item in Model)
+            {
+                <a asp-controller="Chat"
+                   asp-action="Index"
+                   asp-route-conversationId="@item.ConversationId"
+                   class="flex gap-3 p-4 hover:bg-slate-50 border-b no-underline text-slate-900">
+
+                    <div class="flex-1 min-w-0">
+                        <div class="font-medium truncate">
+                            @item.DisplayName
+                        </div>
+
+                        <div class="text-sm text-slate-500 truncate">
+                            @item.LastMessage
+                        </div>
+                    </div>
+                </a>
+            }
+
+            <a asp-controller="Chat"
+               asp-action="Index"
+               class="block text-center p-3 text-sky-600 hover:bg-slate-50">
+                Xem tất cả
+            </a>
+
+        </div>
+    </div>
+
+</div>

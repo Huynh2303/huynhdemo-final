@@ -1,0 +1,293 @@
+﻿@model Demo_web_MVC.Models.ViewModel.Admin.ProductManagementViewModel
+       
+        <!-- Canvas -->
+        <div class="p-margin-desktop max-w-container-max mx-auto w-full space-y-stack-lg">
+            <div class="flex justify-between items-end">
+                <div>
+                    <h2 class="font-headline-lg text-headline-lg text-on-surface">Quản lý sản phẩm</h2>
+                    <p class="font-body-md text-body-md text-on-surface-variant mt-1">Quản lý và cập nhật danh sách sản phẩm trong kho trên toàn bộ danh mục.</p>
+                </div>
+                <div class="flex gap-2">
+
+                    <button class="flex items-center gap-2 px-4 py-2 border border-outline-variant rounded-lg text-on-surface font-label-md hover:bg-surface-container transition-colors" style="transform: scale(1);">
+                        <span class="material-symbols-outlined text-[20px]" data-icon="download">download</span>
+                        Xuất file
+                    </button>
+                </div>
+            </div>
+            <!-- Dashboard Stats Summary (Bento Lite) -->
+            <div class="grid grid-cols-4 gap-gutter">
+
+                <div class="bg-surface p-6 rounded-2xl shadow-sm border border-outline-variant">
+                    <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+                ỔNG SẢN PHẨM
+                    </p>
+
+                    <p class="font-display-lg text-display-lg mt-2">
+                        @Model.TotalProducts
+                    </p>
+
+                    <div class="flex items-center gap-1 mt-2 text-primary">
+                        
+                        <span class="text-xs font-medium">
+                    Số lượng sản phẩm trong hệ thống
+                        </span>
+                    </div>
+                </div>
+
+                <div class="bg-surface p-6 rounded-2xl shadow-sm border border-outline-variant">
+                    <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+                SẮP HẾT HÀNG
+                    </p>
+
+                    <p class="font-display-lg text-display-lg mt-2 text-tertiary">
+                        @Model.LowStockProducts
+                    </p>
+
+                    <div class="flex items-center gap-1 mt-2 text-on-surface-variant">
+                        <span class="text-xs font-medium">
+                    Cần được xử lý ngay
+                        </span>
+                    </div>
+                </div>
+
+                <div class="bg-surface p-6 rounded-2xl shadow-sm border border-outline-variant">
+                    <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+                HẾT HÀNG
+                    </p>
+
+                    <p class="font-display-lg text-display-lg mt-2 text-error">
+                        @Model.OutOfStockProducts
+                    </p>
+
+                    <div class="flex items-center gap-1 mt-2 text-on-surface-variant">
+                        <span class="text-xs font-medium">
+                    Không hiển thị trên cửa hàng
+                        </span>
+                    </div>
+                </div>
+
+                <div class="bg-surface p-6 rounded-2xl shadow-sm border border-outline-variant">
+                    <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+                DANH MỤC
+                    </p>
+
+                    <p class="font-display-lg text-display-lg mt-2">
+                        @Model.TotalCategories
+                    </p>
+
+                    <div class="flex items-center gap-1 mt-2 text-on-surface-variant">
+                        <span class="text-xs font-medium">
+                    Đang hoạt động trong hệ thống
+                        </span>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="bg-surface rounded-2xl shadow-sm border border-outline-variant overflow-hidden mt-8">
+
+                <table class="w-full text-left border-collapse">
+
+                    <thead>
+                        <tr class="bg-surface-container-low border-b border-outline-variant">
+                            <th class="px-6 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+                        HÌNH ẢNH
+                            </th>
+
+                            <th class="px-6 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+                        TÊN SẢN PHẨM
+                            </th>
+
+                            <th class="px-6 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+                        DANH MỤC
+                            </th>
+
+                            <th class="px-6 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+                        GIÁ
+                            </th>
+
+                            <th class="px-6 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+                        TỒN KHO
+                            </th>
+
+                            <th class="px-6 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+                        TRẠNG THÁI
+                            </th>
+
+                            <th class="px-6 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider text-right">
+                        THAO TÁC
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <tbody class="divide-y divide-outline-variant">
+
+                        @if (Model.Products == null
+                                        || Model.Products.Items == null
+                                        || !Model.Products.Items.Any())
+                        {
+                            <tr>
+                                <td colspan="7"
+                                    class="px-6 py-8 text-center text-on-surface-variant">
+                                    Chưa có sản phẩm nào.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var product in Model.Products.Items)
+                            {
+                                var stock = product.Variants?.Sum(v => v.Stock) ?? 0;
+
+                                var price = product.Variants?
+                                .OrderBy(v => v.Price)
+                                .FirstOrDefault()?.Price ?? 0;
+
+                                var categoryName = product.Categories?
+                                .FirstOrDefault()?.Name ?? "No Category";
+
+                                var imageUrl = product.imageUrl
+                                .FirstOrDefault() ?? "/uploads/images/no-image.jpg";
+
+                                <tr class="hover:bg-surface-container-lowest transition-colors group">
+
+                                    <td class="px-6 py-4">
+                                        <div class="w-12 h-12 rounded-lg bg-surface-container overflow-hidden border border-outline-variant">
+                                            <img class="w-full h-full object-cover"
+                                                 src="@imageUrl"
+                                                 alt="@product.Name" />
+                                        </div>
+                                    </td>
+
+                                    <td class="px-6 py-4 font-body-md text-body-md font-medium text-on-surface">
+                                        @product.Name
+                                    </td>
+
+                                    <td class="px-6 py-4 font-body-md text-body-md text-on-surface-variant">
+                                        @categoryName
+                                    </td>
+
+                                    <td class="px-6 py-4 font-body-md text-body-md font-semibold">
+                                        @price.ToString("N0") đ
+                                    </td>
+
+                                    <td class="px-6 py-4 font-body-md text-body-md text-on-surface-variant">
+                                        @stock
+                                    </td>
+
+                                    <td class="px-6 py-4">
+                                        @if (stock <= 0)
+                                        {
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
+                                                Out of Stock
+                                            </span>
+                                        }
+                                        else if (stock < 10)
+                                        {
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
+                                                Low Stock
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                                                In Stock
+                                            </span>
+                                        }
+                                    </td>
+
+                                    <td class="px-6 py-4 text-right">
+                                        <div class="flex justify-end gap-2">
+
+                                    <button type="button" data-product-id="@product.Id" class="product-detail-btn p-2 rounded-lg hover:bg-primary-container hover:text-on-primary-container text-primary transition-all">
+                                                <span class="material-symbols-outlined">visibility</span>
+                                            </button>
+
+                                    <button type="button"
+                                            class="delete-product-btn p-2 text-error hover:bg-error/10 rounded-lg transition-colors"
+                                            data-product-id="@product.Id">
+
+                                        <span class="material-symbols-outlined">
+                                            delete
+                                        </span>
+                                    </button>
+
+                                        </div>
+                                    </td>
+
+                                </tr>
+                            }
+                        }
+
+                    </tbody>
+
+                </table>
+
+                @if (Model.Products != null && Model.Products.TotalPages > 1)
+                {
+                    <div class="px-6 py-4 bg-surface-container-low border-t border-outline-variant flex items-center justify-between">
+
+                        <div class="flex items-center gap-2">
+
+                            @if (Model.Products.HasPreviousPage)
+                            {
+                                <button type="button"
+                                        data-page="@(Model.Products.PageIndex - 1)"
+                                        class="product-page-btn p-2 rounded-lg border border-outline-variant hover:bg-surface transition-colors">
+                                    <span class="material-symbols-outlined text-[20px]">
+                                        chevron_left
+                                    </span>
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="button"
+                                        disabled
+                                        class="p-2 rounded-lg border border-outline-variant opacity-50 transition-colors">
+                                    <span class="material-symbols-outlined text-[20px]">
+                                        chevron_left
+                                    </span>
+                                </button>
+                            }
+
+                            @for (int i = 1; i <= Model.Products.TotalPages; i++)
+                            {
+                                <button type="button"
+                                        data-page="@i"
+                                        class="product-page-btn w-8 h-8 rounded-lg font-label-md text-label-md flex items-center justify-center transition-colors
+                                                   @(i == Model.Products.PageIndex
+                                                                               ? "bg-primary text-on-primary"
+                                                                               : "hover:bg-surface-container-high")">
+                            @i
+                        </button>
+                                        }
+
+                            @if (Model.Products.HasNextPage)
+                            {
+                                <button type="button"
+                                        data-page="@(Model.Products.PageIndex + 1)"
+                                        class="product-page-btn p-2 rounded-lg border border-outline-variant hover:bg-surface transition-colors">
+                                    <span class="material-symbols-outlined text-[20px]">
+                                        chevron_right
+                                    </span>
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="button"
+                                        disabled
+                                        class="p-2 rounded-lg border border-outline-variant opacity-50 transition-colors">
+                                    <span class="material-symbols-outlined text-[20px]">
+                                        chevron_right
+                                    </span>
+                                </button>
+                            }
+
+                        </div>
+
+                    </div>
+                }
+
+            </div>
+        </div>

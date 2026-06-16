@@ -1,0 +1,85 @@
+﻿@model Demo_web_MVC.Models.ViewModel.Search.SearchViewModel
+
+    
+    <main class="mt-24 mb-xl max-w-[1200px] mx-auto px-6 w-full flex-grow">
+       
+        <!-- Title Section -->
+        <div class="mb-xl">
+            <h1 class="font-display-lg text-display-lg text-on-surface mb-2">Kết quả tìm kiếm cho: '<span class="text-primary-container">@Model.SearchQuery</span>'</h1>
+            <p class="font-body-base text-on-surface-variant">Tìm thấy @Model.PagingInfo!.TotalItems sản phẩm</p>
+        </div>
+        
+        <!-- Product Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-gutter">
+            <!-- Product Card Loop Simulation -->
+            <partial name="_Product" model="Model.ProductVMResults" />
+        </div>
+        <!-- Empty State (Hidden by default unless results are zero) -->
+        <div class="hidden flex-col items-center justify-center py-24 text-center">
+            <span class="material-symbols-outlined text-7xl text-gray-300 mb-4">search_off</span>
+            <h2 class="text-headline-md font-headline-md text-on-surface mb-2">Không tìm thấy kết quả</h2>
+            <p class="text-body-base text-on-surface-variant max-w-md mx-auto">Vui lòng kiểm tra lại chính tả hoặc thử sử dụng những từ khóa khác tổng quát hơn.</p>
+            <button class="mt-6 px-8 py-3 bg-primary-container text-on-primary font-label-bold rounded-lg shadow-lg active:scale-95 transition-all">Quay lại trang chủ</button>
+        </div>
+        
+        @if(Model.PagingInfo!.TotalPages >1){
+
+            <div class="mt-xl flex justify-center items-center gap-2">
+                @if (Model.PagingInfo!.CurrentPage > 1)
+                {
+                    <!-- Trang trước (Previous) -->
+                    <a href="@Url.Action("Index", "Search", new { searchQuery = Model.SearchQuery, page = Model.PagingInfo.CurrentPage - 1 })"
+                       class="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-lg text-gray-400 cursor-pointer">
+                        <span class="material-symbols-outlined">chevron_left</span>
+                    </a>
+                }
+                else
+                {
+                    <!-- Trang trước bị khóa -->
+                    <button class="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-lg text-gray-400 cursor-not-allowed">
+                        <span class="material-symbols-outlined">chevron_left</span>
+                    </button>
+                }
+
+                <!-- Các số trang (1, 2, 3, ...) -->
+                @for (int i = 1; i <= Model.PagingInfo.TotalPages && i <= 5; i++)  
+                {
+                    <a href="@Url.Action("Index", "Search", new { searchQuery = Model.SearchQuery, page = i })"
+                       class="w-10 h-10 flex items-center justify-center @(i == Model.PagingInfo.CurrentPage ? "bg-primary-container text-on-primary font-label-bold rounded-lg shadow-md" : "bg-white border border-gray-200 text-on-surface font-label-bold rounded-lg hover:border-primary-container hover:text-primary-container transition-colors")">
+                        @i
+                    </a>
+                }
+
+                <!-- Dấu "..." nếu có nhiều trang hơn 5 -->
+                @if (Model.PagingInfo.TotalPages > 5 && Model.PagingInfo.CurrentPage < Model.PagingInfo.TotalPages - 2)
+                {
+                    <span class="px-2 text-on-surface-variant">...</span>
+                }
+
+                <!-- Các trang gần cuối -->
+                @for (int i = Model.PagingInfo.TotalPages - 2; i <= Model.PagingInfo.TotalPages && i > 5; i++)  
+                {
+                    <a href="@Url.Action("Index", "Search", new { searchQuery = Model.SearchQuery, page = i })"
+                       class="w-10 h-10 flex items-center justify-center @(i == Model.PagingInfo.CurrentPage ? "bg-primary-container text-on-primary font-label-bold rounded-lg shadow-md" : "bg-white border border-gray-200 text-on-surface font-label-bold rounded-lg hover:border-primary-container hover:text-primary-container transition-colors")">
+                        @i
+                    </a>
+                }
+
+                <!-- Trang cuối -->
+                @if (Model.PagingInfo.CurrentPage < Model.PagingInfo.TotalPages)
+                {
+                    <a href="@Url.Action("Index", "Search", new { searchQuery = Model.SearchQuery, page = Model.PagingInfo.CurrentPage + 1 })"
+                       class="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-lg text-on-surface hover:border-primary-container hover:text-primary-container transition-colors">
+                        <span class="material-symbols-outlined">chevron_right</span>
+                    </a>
+                }
+                else
+                {
+                    <!-- Trang cuối bị khóa -->
+                    <button class="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-lg text-on-surface cursor-not-allowed">
+                        <span class="material-symbols-outlined">chevron_right</span>
+                    </button>
+                }
+            </div>
+        }
+    </main>

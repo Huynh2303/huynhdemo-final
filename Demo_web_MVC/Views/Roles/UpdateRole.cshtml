@@ -1,0 +1,56 @@
+﻿@model List<Demo_web_MVC.Models.ViewModel.UserRoleViewModel>
+
+<form method="post">
+
+<table border="1" cellpadding="8">
+    <thead>
+        <tr>
+            <th>User</th>
+            <th>Email</th>
+            <th>Quyền</th>
+        </tr>
+    </thead>
+    <tbody>
+    @for (int i = 0; i < Model.Count; i++)
+    {
+        <tr>
+            <td>
+                @Model[i].Username
+                <input type="hidden" name="[@i].UserId"
+                       value="@Model[i].UserId" />
+            </td>
+            <td>@Model[i].Email</td>
+            <td>
+                <label>
+                    <input type="radio"
+                           name="[@i].SelectedRole"
+                           value="ADMIN"
+                           @(Model[i].SelectedRole == "ADMIN" ? "checked" : "") />
+                    Admin
+                </label>
+
+                <label>
+                    <input type="radio"
+                           name="[@i].SelectedRole"
+                           value="STAFF"
+                           @(Model[i].SelectedRole == "STAFF" ? "checked" : "") />
+                    Staff
+                </label>
+
+                <label>
+                    <input type="radio"
+                           name="[@i].SelectedRole"
+                           value="USER"
+                           @(Model[i].SelectedRole == "USER" ? "checked" : "") />
+                    User
+                </label>
+            </td>
+        </tr>
+    }
+    
+    </tbody>
+</table>
+
+<br />
+<button type="submit">Lưu thay đổi</button>
+</form>

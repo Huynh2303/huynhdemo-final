@@ -1,0 +1,202 @@
+﻿@model Demo_web_MVC.Models.Conversation
+@using System.Security.Claims
+
+@{
+    ViewData["Title"] = "Chi tiết hội thoại";
+
+    var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "0");
+
+    var title = Model.Type == "SystemSupport"
+        ? "Hỗ trợ hệ thống"
+        : $"Đơn hàng #{Model.OrderId}";
+}
+
+<div class="max-w-6xl mx-auto p-lg">
+
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+
+        <div class="px-lg py-md border-b border-slate-200 flex items-center justify-between">
+            <h2 class="text-lg font-bold">@title</h2>
+
+            <a asp-action="Index"
+               class="text-sm text-sky-600 hover:underline">
+                Quay lại
+            </a>
+        </div>
+
+        <div id="messageBox"
+             class="h-[600px] overflow-y-auto p-lg bg-slate-50 space-y-4">
+
+            @if (!Model.Messages.Any())
+            {
+                <div id="emptyMessage" class="text-center text-slate-500">
+                    Chưa có tin nhắn nào
+                </div>
+            }
+
+            @foreach (var message in Model.Messages.OrderBy(x => x.CreatedAt))
+            {
+                var isMine = message.SenderId == currentUserId;
+
+                <div class="flex @(isMine ? "justify-end" : "justify-start")">
+                    <div class="max-w-[65%]">
+
+                        <div class="
+                                px-md py-sm shadow-sm text-sm leading-relaxed
+                                @(isMine
+                                                             ? "bg-white text-slate-800 rounded-2xl rounded-tr-sm border border-slate-200"
+                                                             : "bg-sky-500 text-white rounded-2xl rounded-tl-sm")">
+
+                        @message.Content
+                    </div>
+
+                        <div class="text-xs text-slate-400 mt-1 @(isMine ? "text-right" : "text-left")">
+                            @message.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                        </div>
+
+                    </div>
+                </div>
+                        }
+
+        </div>
+
+        <div class="border-t border-slate-200 p-lg">
+
+            <form id="sendMessageForm"
+                  asp-action="SendMessage"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <input type="hidden"
+                       id="conversationId"
+                       name="conversationId"
+                       value="@Model.Id" />
+
+                <div class="flex gap-sm">
+
+                    <input type="text"
+                           id="messageContent"
+                           name="content"
+                           autocomplete="off"
+                           class="flex-1 border border-slate-300 rounded-lg px-md py-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+                           placeholder="Nhập tin nhắn..." />
+
+                    <button type="submit"
+                            id="sendButton"
+                            class="px-lg py-sm bg-sky-600 text-white rounded-lg hover:bg-sky-700">
+                        Gửi
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+
+<script>
+    const currentUserId = @currentUserId;
+    const conversationId = document.getElementById("conversationId").value;
+    const messageBox = document.getElementById("messageBox");
+    const form = document.getElementById("sendMessageForm");
+    const input = document.getElementById("messageContent");
+    const sendButton = document.getElementById("sendButton");
+
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/chatHub")
+        .withAutomaticReconnect()
+        .build();
+
+    connection.start()
+        .then(function () {
+            return connection.invoke("JoinConversation", parseInt(conversationId));
+        })
+        .catch(function (err) {
+            console.error(err);
+        });
+
+    connection.on("ReceiveMessage", function (message) {
+        appendMessage(message.senderId, message.content, message.createdAt);
+    });
+
+    form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const content = input.value.trim();
+
+        if (content === "") {
+            return;
+        }
+
+        sendButton.disabled = true;
+
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch(form.action, {
+                method: "POST",
+                body: formData
+            });
+
+            if (response.ok) {
+                input.value = "";
+            } else {
+                alert("Gửi tin nhắn thất bại.");
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Có lỗi khi gửi tin nhắn.");
+        }
+
+        sendButton.disabled = false;
+        input.focus();
+    });
+
+    function appendMessage(senderId, content, createdAt) {
+        const emptyMessage = document.getElementById("emptyMessage");
+
+        if (emptyMessage) {
+            emptyMessage.remove();
+        }
+
+        const isMine = parseInt(senderId) === currentUserId;
+
+        const html = `
+            <div class="flex ${isMine ? "justify-end" : "justify-start"}">
+                <div class="max-w-[65%]">
+                    <div class="px-md py-sm shadow-sm text-sm leading-relaxed
+                        ${isMine
+                            ? "bg-white text-slate-800 rounded-2xl rounded-tr-sm border border-slate-200"
+                            : "bg-sky-500 text-white rounded-2xl rounded-tl-sm"}">
+                        ${escapeHtml(content)}
+                    </div>
+
+                    <div class="text-xs text-slate-400 mt-1 ${isMine ? "text-right" : "text-left"}">
+                        ${escapeHtml(createdAt)}
+                    </div>
+                </div>
+            </div>
+        `;
+
+        messageBox.insertAdjacentHTML("beforeend", html);
+        messageBox.scrollTop = messageBox.scrollHeight;
+    }
+
+    function escapeHtml(value) {
+        return value
+            .toString()
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+    }
+
+    messageBox.scrollTop = messageBox.scrollHeight;
+</script>

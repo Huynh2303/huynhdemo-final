@@ -1,0 +1,107 @@
+﻿@model Demo_web_MVC.Models.FraudAnalysis
+
+<div class="p-6 space-y-6">
+
+    <div class="border-b pb-4 pr-12">
+        <h2 class="text-xl font-semibold text-gray-800">
+            Phân tích rủi ro đơn hàng
+        </h2>
+
+        <p class="text-sm text-gray-500">
+            Order ID: #@Model.OrderId
+        </p>
+    </div>
+
+    <div class="grid grid-cols-3 gap-4">
+
+        <div class="border rounded-xl p-4">
+            <p class="text-sm text-gray-500">Điểm rủi ro</p>
+            <p class="text-3xl font-bold text-yellow-600 mt-2">
+                @Model.RiskScore
+            </p>
+        </div>
+
+        <div class="border rounded-xl p-4">
+            <p class="text-sm text-gray-500">Mức độ</p>
+
+            <p class="text-lg font-semibold mt-2">
+                @if (Model.RiskLevel == "High")
+                {
+                    <span class="text-red-500">Cao</span>
+                }
+                else if (Model.RiskLevel == "Medium")
+                {
+                    <span class="text-yellow-500">Trung bình</span>
+                }
+                else
+                {
+                    <span class="text-green-600">Thấp</span>
+                }
+            </p>
+        </div>
+
+        <div class="border rounded-xl p-4">
+            <p class="text-sm text-gray-500">Model phân tích</p>
+            <p class="text-lg font-semibold mt-2 text-gray-800">
+                @Model.ModelName
+            </p>
+        </div>
+
+    </div>
+
+    @using System.Text.Json
+
+    @{
+        var reasons = new List<string>();
+
+        if (!string.IsNullOrEmpty(Model.RiskReasons))
+        {
+            try
+            {
+                reasons = JsonSerializer.Deserialize<List<string>>(Model.RiskReasons)
+                ?? new List<string>();
+            }
+            catch
+            {
+                reasons.Add(Model.RiskReasons);
+            }
+        }
+    }
+
+    <div>
+        <p class="text-sm text-gray-500 mb-2">
+            Lý do cảnh báo
+        </p>
+
+        <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-sm text-gray-700">
+
+            @if (reasons.Any())
+            {
+                <ul class="list-disc pl-5 space-y-1">
+
+                    @foreach (var reason in reasons)
+                    {
+                        <li>@reason</li>
+                    }
+
+                </ul>
+            }
+            else
+            {
+                <span>Không có cảnh báo.</span>
+            }
+
+        </div>
+    </div>
+
+    <div>
+        <p class="text-sm text-gray-500 mb-2">
+            Thời gian phân tích
+        </p>
+
+        <p class="text-gray-700">
+            @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+        </p>
+    </div>
+
+</div>

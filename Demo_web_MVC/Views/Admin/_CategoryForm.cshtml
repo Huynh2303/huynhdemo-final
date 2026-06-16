@@ -1,0 +1,41 @@
+﻿@model Demo_web_MVC.Models.ViewModel.Admin.CategoryManagementViewModel
+
+<form id="category-form">
+    <input type="hidden" name="Id" value="@Model.Id" />
+
+    <div class="mb-4">
+        <label class="block mb-1">Tên danh mục</label>
+        <input type="text"
+               name="Name"
+               value="@Model.Name"
+               class="w-full border rounded-lg px-3 py-2" />
+    </div>
+
+    <div class="mb-4">
+        <label class="block mb-1">Danh mục cha</label>
+
+        <select name="ParentId" class="w-full border rounded-lg px-3 py-2">
+            <option value="0">Không có danh mục cha</option>
+
+            @foreach (var item in Model.ParentCategories)
+            {
+                <option value="@item.Id" selected="@(Model.ParentId == item.Id)">
+                    @item.Name
+                </option>
+            }
+        </select>
+    </div>
+
+    <div class="flex justify-end gap-2">
+        <button type="button"
+                id="close-category-modal-btn"
+                class="px-4 py-2 border rounded-lg">
+            Hủy
+        </button>
+
+        <button type="submit"
+                class="px-4 py-2 bg-primary text-white rounded-lg">
+            @(Model.Id == null ? "Thêm" : "Cập nhật")
+        </button>
+    </div>
+</form>

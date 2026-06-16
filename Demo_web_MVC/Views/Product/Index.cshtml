@@ -1,0 +1,146 @@
+﻿@model PaginatedList<Demo_web_MVC.Models.ViewModel.Product.ProductViewModel>
+@using Demo_web_MVC.Models.ViewModel.Product
+
+
+
+    <main class="flex-1 w-full max-w-7xl mx-auto px-4 md:px-8">
+       
+        <!-- Banner Carousel -->
+        <section class="mb-xl relative group overflow-hidden rounded-xl h-[400px]">
+            <div class="absolute inset-0 bg-gradient-to-r from-slate-900/60 to-transparent z-10 flex flex-col justify-center px-lg md:px-xl">
+                <span class="text-primary-container font-label-bold text-label-bold uppercase mb-2">Sản phẩm công nghệ mới</span>
+                <h1 class="text-white font-display-lg text-display-lg mb-4 max-w-md">Thiết kế hiện đại dành cho cuộc sống thông minh</h1>
+                <p class="text-white/80 text-body-base max-w-sm mb-6">Khám phá bộ sưu tập thiết bị công nghệ mới nhất với hiệu năng mạnh mẽ và phong cách hiện đại dành cho nhu cầu hằng ngày.</p>
+                <button class="bg-primary-container text-white w-fit px-8 py-3 rounded-lg font-headline-md hover:brightness-110 transition-all active:scale-95 shadow-lg shadow-primary-container/30">Tham gia ngay</button>
+            </div>
+            <img class="w-full h-full object-cover" data-alt="Modern bright retail storefront with minimalist clothing displays and soft ambient window lighting" src="https://img.pikbest.com/templates/20240520/bright-blue-sale-banner-decorates-electronics-shop_10575158.jpg!w700wp" />
+            <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+                <div class="w-2 h-2 rounded-full bg-white"></div>
+                <div class="w-2 h-2 rounded-full bg-white/40"></div>
+                <div class="w-2 h-2 rounded-full bg-white/40"></div>
+            </div>
+            <button class="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/20 backdrop-blur-md text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <span class="material-symbols-outlined">chevron_right</span>
+            </button>
+        </section>
+        <section class="mb-xl">
+            <div class="bg-surface-container-lowest rounded-xl p-lg shadow-[0px_4px_12px_rgba(0,0,0,0.05)]">
+
+                <h2 class="text-title-lg font-bold mb-md">
+                    Danh mục nổi bật
+                </h2>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-lg">
+
+                    <a asp-action="Index" asp-route-categoryId="2"
+                       class="group overflow-hidden rounded-xl shadow hover:shadow-lg transition-all no-underline">
+                        <img src="https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=600"
+                             class="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300" />
+                        <div class="p-md text-center font-semibold">Laptop</div>
+                    </a>
+
+                    <a asp-action="Index" asp-route-categoryId="1"
+                       class="group overflow-hidden rounded-xl shadow hover:shadow-lg transition-all no-underline">
+                        <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600"
+                             class="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300" />
+                        <div class="p-md text-center font-semibold">Điện thoại</div>
+                    </a>
+
+                    <a asp-action="Index" asp-route-categoryId="15"
+                       class="group overflow-hidden rounded-xl shadow hover:shadow-lg transition-all no-underline">
+                        <img src="https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=600"
+                             class="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300" />
+                        <div class="p-md text-center font-semibold">Đồng hồ</div>
+                    </a>
+
+                    <a asp-action="Index" asp-route-categoryId="18"
+                       class="group overflow-hidden rounded-xl shadow hover:shadow-lg transition-all no-underline">
+                        <img src="https://images.unsplash.com/photo-1589003077984-894e133dabab?w=600"
+                             class="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300" />
+                        <div class="p-md text-center font-semibold">Loa</div>
+                    </a>
+
+                    <a asp-action="Index" asp-route-categoryId="16"
+                       class="group overflow-hidden rounded-xl shadow hover:shadow-lg transition-all no-underline">
+                        <img src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=600"
+                             class="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300" />
+                        <div class="p-md text-center font-semibold">Máy ảnh</div>
+                    </a>
+
+                    <a asp-action="Index" asp-route-categoryId="3"
+                       class="group overflow-hidden rounded-xl shadow hover:shadow-lg transition-all no-underline">
+                        <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600"
+                             class="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300" />
+                        <div class="p-md text-center font-semibold">Tai nghe</div>
+                    </a>
+
+                    <a asp-action="Index" asp-route-categoryId=""
+                       class="group overflow-hidden rounded-xl shadow hover:shadow-lg transition-all no-underline">
+                        <img src="https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=600"
+                             class="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300" />
+                        <div class="p-md text-center font-semibold">Tablet</div>
+                    </a>
+
+                    <a asp-action="Index" asp-route-categoryId="8"
+                       class="group overflow-hidden rounded-xl shadow hover:shadow-lg transition-all no-underline">
+                        <img src="https://images.unsplash.com/photo-1605901309584-818e25960a8f?w=600"
+                             class="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300" />
+                        <div class="p-md text-center font-semibold">Gaming</div>
+                    </a>
+
+                </div>
+            </div>
+        </section>
+        <!-- Main Product List -->
+        <section class="mb-xl">
+            <!-- Product list  -->
+        @if (Context.Request.Query.ContainsKey("categoryId"))
+        {
+            <partial name="_productbycategory" model="Model.Items" />
+        }
+        else
+        {
+            <partial name="ProductList" model="Model.Items" />
+        }
+        @if (Model != null && Model.TotalPages > 1)
+        {
+            <div class="flex justify-center items-center gap-2 mt-8">
+
+                @if (Model.HasPreviousPage)
+                {
+                    <a asp-action="Index"
+                       asp-route-page="@(Model.PageIndex - 1)"
+                       asp-route-categoryId="@Context.Request.Query["categoryId"]"
+                       class="px-4 py-2 rounded-lg border bg-white no-underline">
+                        Trước
+                    </a>
+                }
+
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <a asp-action="Index"
+                       asp-route-page="@i"
+                       asp-route-categoryId="@Context.Request.Query["categoryId"]"
+                       class="w-9 h-9 rounded-lg border flex items-center justify-center no-underline
+                              @(i == Model.PageIndex ? "bg-primary text-white" : "bg-white")">
+                        @i
+                    </a>
+                }
+
+                @if (Model.HasNextPage)
+                {
+                    <a asp-action="Index"
+                       asp-route-page="@(Model.PageIndex + 1)"
+                       asp-route-categoryId="@Context.Request.Query["categoryId"]"
+                       class="px-4 py-2 rounded-lg border bg-white no-underline">
+                        Sau
+                    </a>
+                }
+
+            </div>
+        }
+        </section>
+        <!-- Newsletter Section -->
+        
+    </main>
+    

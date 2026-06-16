@@ -1,0 +1,79 @@
+﻿
+@model List<Demo_web_MVC.Models.ViewModel.Oder.OderViewModel>
+
+
+    
+        @{
+            ViewData["Title"] = "Danh sách đơn hàng";
+            Layout = null;
+        }
+<div class="w-full space-y-lg">
+
+        <!-- Filter Tabs -->
+        <div class="bg-surface-container-lowest rounded-lg shadow-sm mb-lg overflow-x-auto">
+        <div class="grid grid-cols-5 w-full">
+                
+                <a href="#"
+                   data-url="@Url.Action("Index", "Oder", new { status = "All" })"
+               class="order-tab w-full text-center px-lg py-md text-label-bold font-label-bold transition-all">
+                    Tất cả
+                </a>
+
+                <a href="#"
+                   data-url="@Url.Action("Index", "Oder", new { status = "Pending" })"
+               class="order-tab w-full text-center px-lg py-md text-label-bold font-label-bold text-on-surface-variant hover:text-primary transition-all">
+                    Chờ xử lý
+                </a>
+
+                <a href="#"
+                   data-url="@Url.Action("Index", "Oder", new { status = "Shipping" })"
+               class="order-tab w-full text-center px-lg py-md text-label-bold font-label-bold text-on-surface-variant hover:text-primary transition-all">
+                    Đang giao
+                </a>
+
+                <a href="#"
+                   data-url="@Url.Action("Index", "Oder", new { status = "Completed" })"
+               class="order-tab w-full text-center px-lg py-md text-label-bold font-label-bold text-on-surface-variant hover:text-primary transition-all">
+                    Đã giao
+                </a>
+
+                <a href="#"
+                   data-url="@Url.Action("Index", "Oder", new { status = "Cancelled" })"
+               class="order-tab w-full text-center px-lg py-md text-label-bold font-label-bold text-on-surface-variant hover:text-primary transition-all">
+                    Đã hủy
+                </a>
+            </div>
+        </div>
+        <!-- Order List -->
+    <div id="order-list-container" class="w-full space-y-md">
+
+
+
+            <partial name="_OrderList" model="Model" />
+        </div>
+    </div>
+    <script>
+        document.addEventListener('click', async e => {
+
+            const tab = e.target.closest('.order-tab');
+
+            if (!tab) return;
+
+            e.preventDefault();
+
+            try {
+
+                const response = await fetch(tab.dataset.url);
+
+                const html = await response.text();
+
+                document.getElementById('order-list-container').innerHTML = html;
+
+            } catch (err) {
+
+                console.error(err);
+
+                alert('Không tải được đơn hàng');
+            }
+        });
+    </script>

@@ -1,0 +1,427 @@
+﻿@model List<Demo_web_MVC.Models.ViewModel.Carts.CartItemViewModel>
+
+@using System.Globalization
+
+@{
+    ViewData["Title"] = "Giỏ hàng";
+
+    var culture = new CultureInfo("vi-VN");
+    decimal totalAmount = Model != null ? Model.Sum(x => x.Price * x.Quantity) : 0;
+    int totalQuantity = Model != null ? Model.Sum(x => x.Quantity) : 0;
+}
+
+<link rel="stylesheet" href="~/css/Cartitems1.css" />
+
+<div class="cart-page">
+    <div class="cart-container">
+
+        @if (Model == null || !Model.Any())
+        {
+            <div class="cart-empty">
+                <div class="cart-empty__icon">🛒</div>
+                <h3>Giỏ hàng của bạn đang trống</h3>
+                <p>Hãy thêm sản phẩm để tiếp tục mua sắm.</p>
+                <a href="@Url.Action("Index", "Product")" class="cart-empty__btn">Mua sắm ngay</a>
+            </div>
+        }
+        else
+        {
+            <div class="cart-header">
+                <div class="cart-header__check">
+                    <input type="checkbox" id="check-all" class="cart-checkbox item-check" />
+                </div>
+
+                <div class="cart-header__product">
+                    Sản phẩm
+                </div>
+
+                <div class="cart-header__price">Đơn giá</div>
+                <div class="cart-header__quantity">Số lượng</div>
+                <div class="cart-header__total">Số tiền</div>
+                <div class="cart-header__action">Thao tác</div>
+            </div>
+
+            <div class="cart-list">
+                @foreach (var item in Model)
+                {
+                    var imagePath = !string.IsNullOrEmpty(item.ImageUrl)
+                        ? Url.Content(item.ImageUrl)
+                        : Url.Content("~/uploads/images/no-image.jpg");
+
+                    var itemTotal = item.Price * item.Quantity;
+
+                    <div class="cart-item" data-id="@item.Id">
+                        <div class="cart-item__check">
+                            <input type="checkbox" class="cart-checkbox item-check" value="@item.Id" />
+                        </div>
+
+                        <div class="cart-item__product">
+                            <div class="cart-item__image-wrap">
+                                <img src="@imagePath" alt="@item.ProductName" class="cart-item__image" />
+                            </div>
+
+                            <div class="cart-item__info">
+                                <a href="#" class="cart-item__name">@item.ProductName</a>
+
+                                <div class="cart-item__variant">
+                                    Phân loại hàng:
+                                    @if (!string.IsNullOrEmpty(item.Color))
+                                    {
+                                        <span>@item.Color</span>
+                                    }
+                                    @if (!string.IsNullOrEmpty(item.Size))
+                                    {
+                                        <span> - @item.Size</span>
+                                    }
+                                </div>
+
+                                @if (!string.IsNullOrEmpty(item.Brand))
+                                {
+                                    <div class="cart-item__brand">Thương hiệu: @item.Brand</div>
+                                }
+
+                                <div id="message-@item.Id" class="cart-item__message"></div>
+                            </div>
+                        </div>
+
+                        <div class="cart-item__price">
+                            <span class="item-price" data-price="@item.Price">
+                                @item.Price.ToString("c0", culture)
+                            </span>
+                        </div>
+
+                        <div class="cart-item__quantity">
+                            <div class="quantity-box">
+                                <button type="button" class="qty-btn" onclick="updateQuantity(@item.Id, -1)">−</button>
+                                <input type="text" value="@item.Quantity" id="qty-input-@item.Id" readonly class="qty-input" />
+                                <button type="button" class="qty-btn" onclick="updateQuantity(@item.Id, 1)">+</button>
+                            </div>
+                        </div>
+
+                        <div class="cart-item__total">
+                            <span id="itemTotal-@item.Id" class="item-total !text-[#00B3F6] font-semibold" data-total="@itemTotal">
+                                @itemTotal.ToString("c0", culture)
+                            </span>
+                        </div>
+
+                        <div class="cart-item__action">
+                            <form asp-controller="Cart" asp-action="RemoveItem" method="post" style="display:inline;">
+                                <input type="hidden" name="cartItemId" value="@item.Id" />
+                                <button type="submit" class="delete-link">Xóa</button>
+                            </form>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            
+            <div class="cart-footer">
+                <div class="cart-footer__left">
+                    <label class="cart-footer__select-all">
+                        <input type="checkbox" id="check-all-bottom" class="cart-checkbox item-check" />
+                        <span>Chọn tất cả (@Model.Count)</span>
+                    </label>
+                </div>
+
+                <div class="cart-footer__right">
+                    <div class="cart-summary">
+                        <div class="cart-summary__quantity">
+                            Đã chọn: <strong id="selectedQuantity">0</strong> sản phẩm
+                        </div>
+                        <div class="cart-summary__amount">
+                            Tổng thanh toán:
+                            <strong class=" text-[#00B3F6] font-bold" id="selectedAmount">0 ₫</strong>
+                        </div>
+                    </div>
+
+                    @* <a asp-action="Checkout" asp-controller="Oder" class=" bg-[#00B3F6] text-white px-5 py-3 rounded-lg font-semibold hover:bg-[#009ad1] transition">Mua hàng</a> *@
+                    <form asp-controller="Oder" asp-action="Checkout" method="get" id="checkoutForm">
+                        @Html.AntiForgeryToken()
+
+                        <div id="selectedItemsContainer"></div>
+
+                        <button type="submit"
+                                class="bg-[#00B3F6] text-white px-5 py-3 rounded-lg font-semibold hover:bg-[#009ad1] transition">
+                            Mua hàng
+                        </button>
+                    </form>
+                    
+                </div>
+            </div>
+         
+        }
+        
+    </div>
+</div>
+
+
+@* @section Scripts {
+<script>
+    function formatCurrencyVND(amount) {
+        return amount.toLocaleString('vi-VN') + ' ₫';
+    }
+
+    function calculateSelectedTotal() {
+        let selectedQuantity = 0;
+        let selectedAmount = 0;
+
+        $('.item-check:checked').each(function () {
+            const cartItemId = $(this).val();
+            const quantity = parseInt($('#qty-input-' + cartItemId).val()) || 0;
+            const itemTotal = parseFloat($('#itemTotal-' + cartItemId).attr('data-total')) || 0;
+
+            selectedQuantity += quantity;
+            selectedAmount += itemTotal;
+        });
+
+        $('#selectedQuantity').text(selectedQuantity);
+        $('#selectedAmount').text(formatCurrencyVND(selectedAmount));
+    }
+
+    $(document).ready(function () {
+        function syncCheckAll() {
+            const total = $('.item-check').length;
+            const checked = $('.item-check:checked').length;
+            const allChecked = total > 0 && total === checked;
+
+            $('#check-all').prop('checked', allChecked);
+            $('#check-all-bottom').prop('checked', allChecked);
+        }
+
+        // $('#check-all, #check-all-bottom').on('change', function () {
+        //     const checked = $(this).is(':checked');
+        //     $('.item-check').prop('checked', checked);
+        //     $('#check-all').prop('checked', checked);
+        //     $('#check-all-bottom').prop('checked', checked);
+
+        //     calculateSelectedTotal();
+        // });
+        //         $('#checkoutForm').on('submit', function (e) {
+        //     const selectedIds = $('.item-check:checked');  Lấy tất cả các checkbox đã được tick
+
+        //     Kiểm tra nếu không có sản phẩm nào được chọn
+        //     if (selectedIds.length === 0) {
+        //         e.preventDefault();  Ngừng gửi form
+        //         alert('Vui lòng chọn ít nhất một sản phẩm để mua hàng.');
+        //         return;
+        //     }
+
+        //     Tạo các input ẩn để gửi các cartItemId đã chọn
+        //     $('#selectedItemsContainer').empty();  Xóa các input ẩn cũ (nếu có)
+
+        //     Thêm các cartItemId đã chọn vào form dưới dạng input ẩn
+        //     selectedIds.each(function () {
+        //         const cartItemId = $(this).val();  Lấy cartItemId từ checkbox
+
+        //         Thêm cartItemId vào form
+        //         $('#selectedItemsContainer').append(
+        //             `<input type="hidden" name="selectedCartItemIds" value="${cartItemId}" />`
+        //         );
+        //     });
+        // });
+                $('#checkoutForm').on('submit', function (e) {
+            const selectedIds = $('.item-check:checked');  // Lấy tất cả các checkbox đã được tick
+
+            // Kiểm tra nếu không có sản phẩm nào được chọn
+            if (selectedIds.length === 0) {
+                e.preventDefault();  // Ngừng gửi form
+                alert('Vui lòng chọn ít nhất một sản phẩm để mua hàng.');
+                return;
+            }
+
+            // Tạo các input ẩn để gửi các cartItemId đã chọn
+            $('#selectedItemsContainer').empty();  // Xóa các input ẩn cũ (nếu có)
+
+            // Thêm các cartItemId đã chọn vào form dưới dạng input ẩn
+            selectedIds.each(function () {
+                const cartItemId = $(this).val();  // Lấy cartItemId từ checkbox
+
+                // Thêm cartItemId vào form
+                $('#selectedItemsContainer').append(
+                    `<input type="hidden" name="selectedCartItemIds" value="${cartItemId}" />`
+                );
+            });
+        });
+        $(document).on('change', '.item-check', function () {
+            syncCheckAll();
+            calculateSelectedTotal();
+        });
+
+        calculateSelectedTotal();
+    });
+
+    function updateQuantity(cartItemId, change) {
+        var qtyInput = $('#qty-input-' + cartItemId);
+        var currentQuantity = parseInt(qtyInput.val());
+
+        if (isNaN(currentQuantity)) {
+            $('#message-' + cartItemId).text("Số lượng không hợp lệ").css("color", "red");
+            return;
+        }
+
+        var newQuantity = currentQuantity + change;
+
+        if (newQuantity <= 0) {
+            $('#message-' + cartItemId).text("Số lượng phải lớn hơn 0").css("color", "red");
+            return;
+        }
+
+        $.ajax({
+            url: '@Url.Action("UpdateQuantity", "Cart")',
+            type: 'POST',
+            data: {
+                cartItemId: cartItemId,
+                quantity: newQuantity
+            },
+            success: function (response) {
+                if (response.success) {
+                    qtyInput.val(newQuantity);
+
+                    $('#itemTotal-' + cartItemId)
+                        .text(response.itemTotalFormatted)
+                        .attr('data-total', response.itemTotal);
+
+                    $('#message-' + cartItemId)
+                        .text("Giỏ hàng đã được cập nhật!")
+                        .css("color", "green");
+
+                    calculateSelectedTotal();
+                } else {
+                    $('#message-' + cartItemId)
+                        .text(response.message || "Không thể cập nhật giỏ hàng.")
+                        .css("color", "red");
+                }
+            },
+            error: function () {
+                $('#message-' + cartItemId)
+                    .text("Đã xảy ra lỗi.")
+                    .css("color", "red");
+            }
+        });
+    }
+</script>
+} *@
+@section Scripts {
+    <script>
+        function formatCurrencyVND(amount) {
+            return amount.toLocaleString('vi-VN') + ' ₫';
+        }
+
+        function calculateSelectedTotal() {
+            let selectedQuantity = 0;
+            let selectedAmount = 0;
+
+            // Tính tổng số lượng và tổng tiền của các sản phẩm được chọn
+            $('.item-check:checked').each(function () {
+                const cartItemId = $(this).val();
+                const quantity = parseInt($('#qty-input-' + cartItemId).val()) || 0;
+                const itemTotal = parseFloat($('#itemTotal-' + cartItemId).attr('data-total')) || 0;
+
+                selectedQuantity += quantity;
+                selectedAmount += itemTotal;
+            });
+
+            $('#selectedQuantity').text(selectedQuantity);
+            $('#selectedAmount').text(formatCurrencyVND(selectedAmount));
+        }
+
+        $(document).ready(function () {
+            // Đồng bộ trạng thái "Chọn tất cả"
+            function syncCheckAll() {
+                const total = $('.item-check').length;
+                const checked = $('.item-check:checked').length;
+                const allChecked = total > 0 && total === checked;
+
+                $('#check-all').prop('checked', allChecked);
+                $('#check-all-bottom').prop('checked', allChecked);
+                        $('#check-all, #check-all-bottom').on('change', function () {
+            $('.item-check').prop('checked', $(this).is(':checked'));
+        });
+            }
+
+            // Cập nhật khi có sự thay đổi checkbox
+            $(document).on('change', '.item-check', function () {
+                syncCheckAll();
+                calculateSelectedTotal();
+            });
+
+            // Gửi form khi bấm "Đặt hàng"
+            $('#checkoutForm').on('submit', function (e) {
+                const selectedIds = $('.item-check:checked');  // Lấy tất cả các checkbox đã được tick
+
+                // Kiểm tra nếu không có sản phẩm nào được chọn
+                if (selectedIds.length === 0) {
+                    e.preventDefault();  // Ngừng gửi form
+                    alert('Vui lòng chọn ít nhất một sản phẩm để mua hàng.');
+                    return;
+                }
+
+                // Tạo các input ẩn để gửi các cartItemId đã chọn
+                $('#selectedItemsContainer').empty();  // Xóa các input ẩn cũ (nếu có)
+
+                // Thêm các cartItemId đã chọn vào form dưới dạng input ẩn
+                selectedIds.each(function () {
+                    const cartItemId = $(this).val();  // Lấy cartItemId từ checkbox
+
+                    // Thêm cartItemId vào form
+                    $('#selectedItemsContainer').append(
+                        `<input type="hidden" name="selectedCartItemIds" value="${cartItemId}" />`
+                    );
+                });
+            });
+
+            // Tính toán tổng khi trang load hoặc có sự thay đổi
+            calculateSelectedTotal();
+        });
+
+        function updateQuantity(cartItemId, change) {
+            var qtyInput = $('#qty-input-' + cartItemId);
+            var currentQuantity = parseInt(qtyInput.val());
+
+            if (isNaN(currentQuantity)) {
+                $('#message-' + cartItemId).text("Số lượng không hợp lệ").css("color", "red");
+                return;
+            }
+
+            var newQuantity = currentQuantity + change;
+
+            if (newQuantity <= 0) {
+                $('#message-' + cartItemId).text("Số lượng phải lớn hơn 0").css("color", "red");
+                return;
+            }
+
+            $.ajax({
+                url: '@Url.Action("UpdateQuantity", "Cart")',
+                type: 'POST',
+                data: {
+                    cartItemId: cartItemId,
+                    quantity: newQuantity
+                },
+                success: function (response) {
+                    if (response.success) {
+                        qtyInput.val(newQuantity);
+
+                        $('#itemTotal-' + cartItemId)
+                            .text(response.itemTotalFormatted)
+                            .attr('data-total', response.itemTotal);
+
+                        $('#message-' + cartItemId)
+                            .text("Giỏ hàng đã được cập nhật!")
+                            .css("color", "green");
+
+                        calculateSelectedTotal();
+                    } else {
+                        $('#message-' + cartItemId)
+                            .text(response.message || "Không thể cập nhật giỏ hàng.")
+                            .css("color", "red");
+                    }
+                },
+                error: function () {
+                    $('#message-' + cartItemId)
+                        .text("Đã xảy ra lỗi.")
+                        .css("color", "red");
+                }
+            });
+        }
+    </script>
+}

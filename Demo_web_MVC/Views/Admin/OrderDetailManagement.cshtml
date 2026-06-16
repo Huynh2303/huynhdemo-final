@@ -1,0 +1,188 @@
+﻿@model Demo_web_MVC.Models.ViewModel.Admin.OrderDetailManagementViewModel
+
+<div class="max-w-[1440px] mx-auto p-margin-desktop space-y-8">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="font-headline-lg text-headline-lg text-on-surface">
+                Chi tiết đơn hàng #@Model.Order.Id
+            </h2>
+
+            <p class="font-body-md text-body-md text-on-surface-variant mt-1">
+                Theo dõi thông tin và sản phẩm trong đơn hàng.
+            </p>
+        </div>
+
+        <button type="button"
+                class="flex items-center gap-2 px-5 py-2 rounded-full bg-primary text-on-primary hover:opacity-90 transition-all">
+
+            <span class="material-symbols-outlined text-[20px]">
+                local_shipping
+            </span>
+
+            Cập nhật trạng thái
+        </button>
+    </div>
+
+    <!-- Order + Customer -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- Order Info -->
+        <div class="bg-white rounded-2xl shadow-sm border border-outline-variant/30 p-6 space-y-4">
+
+            <h3 class="font-title-lg text-title-lg text-on-surface">
+                Thông tin đơn hàng
+            </h3>
+
+            <div class="space-y-3">
+
+                <div class="flex justify-between">
+                    <span class="text-on-surface-variant">Mã đơn hàng</span>
+                    <span class="font-medium">#@Model.Order.Id</span>
+                </div>
+
+                <div class="flex justify-between">
+                    <span class="text-on-surface-variant">Ngày tạo</span>
+                    <span>@(Model.Order.CreateAt?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")</span>
+                </div>
+
+                <div class="flex justify-between">
+                    <span class="text-on-surface-variant">Thanh toán</span>
+                    <span>@Model.Order.PaymentMethod</span>
+                </div>
+
+                <div class="flex justify-between">
+                    <span class="text-on-surface-variant">Trạng thái</span>
+
+                    <span class="px-3 py-1 rounded-full bg-primary-fixed text-primary text-sm font-medium">
+                        @Model.Order.Status
+                    </span>
+                </div>
+
+                <div class="flex justify-between">
+                    <span class="text-on-surface-variant">Tổng tiền</span>
+
+                    <span class="font-bold text-primary">
+                        @Model.Order.TotalAmount.ToString("N0") đ
+                    </span>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Customer Info -->
+        <div class="bg-white rounded-2xl shadow-sm border border-outline-variant/30 p-6 space-y-4">
+
+            <h3 class="font-title-lg text-title-lg text-on-surface">
+                Thông tin khách hàng
+            </h3>
+
+            <div class="space-y-3">
+
+                <div class="flex justify-between">
+                    <span class="text-on-surface-variant">Họ tên</span>
+                    <span>@Model.User.FullName</span>
+                </div>
+
+                <div class="flex justify-between">
+                    <span class="text-on-surface-variant">Email</span>
+                    <span>@Model.User.Email</span>
+                </div>
+
+                <div class="flex justify-between">
+                    <span class="text-on-surface-variant">Số điện thoại</span>
+                    <span>@Model.Address?.PhoneNumber</span>
+                </div>
+
+                <div class="grid grid-cols-[120px_1fr] gap-4 items-start">
+                    <span class="text-on-surface-variant">Địa chỉ</span>
+
+                    <span class="text-left leading-6 break-words">
+                        @($"{Model.Address?.AddressLine}, {Model.Address?.City}, {Model.Address?.Country}")
+                    </span>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Items -->
+    <div class="bg-white rounded-2xl shadow-sm border border-outline-variant/30 overflow-hidden">
+
+        <div class="px-6 py-5 border-b border-outline-variant/20">
+            <h3 class="font-title-lg text-title-lg text-on-surface">
+                Sản phẩm trong đơn
+            </h3>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full border-collapse">
+
+                <thead>
+                    <tr class="bg-surface-container-low">
+
+                        <th class="px-6 py-4 text-left uppercase text-on-surface-variant text-sm">
+                            Sản phẩm
+                        </th>
+
+                        <th class="px-6 py-4 text-left uppercase text-on-surface-variant text-sm">
+                            Giá
+                        </th>
+
+                        <th class="px-6 py-4 text-left uppercase text-on-surface-variant text-sm">
+                            Số lượng
+                        </th>
+
+                        <th class="px-6 py-4 text-right uppercase text-on-surface-variant text-sm">
+                            Thành tiền
+                        </th>
+
+                    </tr>
+                </thead>
+
+                <tbody class="divide-y divide-outline-variant/20">
+
+                    @foreach (var item in Model.OrderDetails)
+                    {
+                        <tr class="hover:bg-surface-container-lowest transition-colors">
+
+                            <td class="px-6 py-4">
+
+                                <div class="flex items-center gap-4">
+
+                                    <img src="@item.Img"
+                                         alt="@item.Name"
+                                         class="w-16 h-16 object-cover rounded-xl border border-outline-variant/20" />
+
+                                    <div>
+                                        <p class="font-medium text-on-surface">
+                                            @item.Name
+                                        </p>
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+                            <td class="px-6 py-4">
+                                @item.Price.ToString("N0") đ
+                            </td>
+
+                            <td class="px-6 py-4">
+                                @item.Quantity
+                            </td>
+
+                            <td class="px-6 py-4 text-right font-bold text-primary">
+                                @((item.Price * item.Quantity).ToString("N0")) đ
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+</div>

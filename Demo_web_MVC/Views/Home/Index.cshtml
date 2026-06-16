@@ -1,0 +1,181 @@
+﻿<main class="max-w-[1200px] mx-auto px-8 py-xl grid grid-cols-1 md:grid-cols-[288px_minmax(0,1fr)] gap-lg">
+
+    <!-- Sidebar -->
+    <aside class="w-72 flex flex-col gap-2 p-6 h-fit bg-white rounded-xl shadow-md shadow-black/5 border border-gray-100">
+        <div class="flex items-center gap-3 mb-6 px-3">
+            <div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center overflow-hidden">
+                <img alt="User Profile"
+                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1SJjQP0-k9coIvyMjv7AJix-9BCTMO9K04ikKGkKYJVOHb1AU6vB8KjlS8IAeza7QrLuLLT2Aqcy-OQVho9DfojOFUPUGU4CnyKRl62qQslFeLr9csRWL28BDp5pQ9aXW_tLl-FhezZPgwXY_f5-8uAorceNMUO0122yB1YBdoNUOh3pc5lp_stDpgCMSQVNY9eaze5jeIuJsD0-Jea9-NCOcUk7Z-rQOj_XKup_BmuHOdCdiKPmEOlmQJPQlR3pzdrBFwFAx6Toc">
+            </div>
+
+            <div>
+                <h3 class="text-lg font-bold text-gray-900 leading-tight ">Alex Johnson</h3>
+                <p class="text-xs text-gray-500">alex.j@example.com</p>
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest px-3 mb-2">
+                Danh mục
+            </p>
+
+            <nav class="flex flex-col gap-1">
+                <a href="#"
+                   data-target="ProfileSettings"
+                   class="menu-item flex items-center gap-3 text-gray-500 hover:bg-gray-50 p-3 rounded-lg hover:translate-x-1 transition-transform active:scale-[0.98]">
+                    <span class="material-symbols-outlined">person</span>
+                    <span class="font-be-vietnam-pro text-sm">Đổi mật khẩu</span>
+                </a>
+
+                <a href="#"
+                   data-target="OrderHistory"
+                   class="menu-item flex items-center gap-3 text-gray-500 hover:bg-gray-50 p-3 rounded-lg hover:translate-x-1 transition-transform active:scale-[0.98]">
+                    <span class="material-symbols-outlined">package_2</span>
+                    <span class="font-be-vietnam-pro text-sm">Đơn hàng</span>
+                </a>
+
+                <a href="#"
+                   data-target="MyAddresses"
+                   class="menu-item flex items-center gap-3 bg-sky-50 text-sky-600 font-bold p-3 rounded-lg hover:translate-x-1 transition-transform active:scale-[0.98]">
+                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">location_on</span>
+                    <span class="font-be-vietnam-pro text-sm">Địa chỉ</span>
+                </a>
+            </nav>
+        </div>
+
+        <div class="mt-4 pt-4 border-t border-gray-100">
+            <a href="#"
+               class="flex items-center gap-3 text-red-500 hover:bg-red-50 p-3 rounded-lg transition-transform active:scale-[0.98]">
+                <span class="material-symbols-outlined">logout</span>
+                <span class="font-be-vietnam-pro text-sm font-semibold">Logout</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Nội dung bên phải -->
+    <section id="main-content" class="min-w-0 w-full overflow-hidden"></section>
+
+</main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const mainContent = document.getElementById('main-content');
+
+        const urls = {
+            MyAddresses: '/Adress/IndexPartial',
+            ProfileSettings: '/User/ChangePassword',
+            OrderHistory: '/Oder/Index'
+        };
+
+        function setActiveMenu(activeItem) {
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.classList.remove('bg-sky-50', 'text-sky-600', 'font-bold');
+                item.classList.add('text-gray-500');
+            });
+
+            activeItem.classList.add('bg-sky-50', 'text-sky-600', 'font-bold');
+            activeItem.classList.remove('text-gray-500');
+        }
+
+            async function loadPartial(url) {
+        try {
+            const response = await fetch(url);
+
+            // Nếu bị redirect sang Login
+            if (response.redirected &&
+                response.url.toLowerCase().includes('/login')) {
+
+                window.location.href = response.url;
+                return;
+            }
+
+            if (response.status === 401 || response.status === 403) {
+                window.location.href = '/User/Login';
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error(response.status);
+            }
+
+            mainContent.innerHTML = await response.text();
+        }
+        catch {
+            mainContent.innerHTML =
+                '<p class="text-red-500">Không tải được nội dung.</p>';
+        }
+    }
+
+        // Click menu trái
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', e => {
+                e.preventDefault();
+
+                const target = item.dataset.target;
+                const url = urls[target];
+
+                if (!url) {
+                    return;
+                }
+
+                setActiveMenu(item);
+                loadPartial(url);
+            });
+        });
+
+        // Load tab mặc định
+        const defaultTab = localStorage.getItem('defaultTab') || 'MyAddresses';
+        const defaultMenu = document.querySelector(`.menu-item[data-target="${defaultTab}"]`);
+
+        if (defaultMenu) {
+            defaultMenu.click();
+        }
+
+        localStorage.removeItem('defaultTab');
+
+        // Load partial bằng data-url
+        document.addEventListener('click', e => {
+            const btn = e.target.closest('[data-url]');
+
+            if (!btn) {
+                return;
+            }
+
+            e.preventDefault();
+            loadPartial(btn.dataset.url);
+        });
+
+        // Submit form ajax cho địa chỉ
+        document.addEventListener('submit', async e => {
+            const form = e.target;
+
+            const isAjaxForm =
+                form.dataset.ajax ||
+                form.action.includes('/Adress/Create') ||
+                form.action.includes('/Adress/Edit') ||
+                form.action.includes('/Adress/Delete') ||
+                form.action.includes('/Adress/SetDefault');
+
+            if (!isAjaxForm) {
+                return;
+            }
+
+            e.preventDefault();
+
+            try {
+                const response = await fetch(form.action, {
+                    method: form.method || 'POST',
+                    body: new FormData(form)
+                });
+
+                if (!response.ok) {
+                    throw new Error(response.status);
+                }
+
+                mainContent.innerHTML = await response.text();
+            } catch {
+                mainContent.innerHTML = '<p class="text-red-500">Lỗi xảy ra khi submit.</p>';
+            }
+        });
+    });
+</script>

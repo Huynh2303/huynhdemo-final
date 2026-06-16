@@ -1,0 +1,335 @@
+﻿@model Demo_web_MVC.Models.ViewModel.Admin.OderManagementViewModel
+@using Demo_web_MVC.Models
+@functions {
+    string GetOrderCode(int id)
+    {
+        return $"#ORD-{id:00000}";
+    }
+
+    string GetCustomerInitials(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return "?";
+
+        var parts = name.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+        if (parts.Length == 1)
+            return parts[0][0].ToString().ToUpper();
+
+        return $"{parts[0][0]}{parts[^1][0]}".ToUpper();
+    }
+
+    string GetPaymentIcon(PaymentMethod paymentMethod)
+    {
+        return paymentMethod switch
+        {
+            PaymentMethod.COD => "payments",
+            
+            _ => "credit_card"
+        };
+    }
+
+    string GetStatusClass(OrderStatus status)
+    {
+        return status switch
+        {
+            OrderStatus.Completed => "bg-green-100 text-green-700",
+            OrderStatus.Pending => "bg-amber-100 text-amber-700",
+            OrderStatus.Cancelled => "bg-red-100 text-red-700",
+            _ => "bg-gray-100 text-gray-700"
+        };
+    }
+
+    string GetStatusDotClass(OrderStatus status)
+    {
+        return status switch
+        {
+            OrderStatus.Completed => "bg-green-500",
+            OrderStatus.Pending => "bg-amber-500",
+            OrderStatus.Cancelled => "bg-red-500",
+            _ => "bg-gray-500"
+        };
+    }
+}
+        <!-- Page Canvas -->
+        <div class="p-margin-desktop flex-1 max-w-container-max mx-auto w-full">
+            <!-- Header Section -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                <div>
+            <h2 class="font-display-lg text-display-lg text-on-surface"> Quản lý đơn hàng</h2>
+            <p class="font-body-md text-body-md text-on-surface-variant">Theo dõi và xử lý đơn hàng của khách hàng trên toàn hệ thống.</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button class="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface border border-outline-variant font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-low transition-all">
+                        <span class="material-symbols-outlined text-[20px]" data-icon="file_download">file_download</span>
+                Xuất file CSV
+                    </button>
+                    <button class="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-on-primary font-label-md text-label-md shadow-sm hover:opacity-90 transition-all">
+                        <span class="material-symbols-outlined text-[20px]" data-icon="add">add</span>
+                Tạo đơn hàng
+                    </button>
+                </div>
+            </div>
+            <!-- Dashboard Stats Grid (Bento Style Lite) -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-gutter mb-8">
+                    <div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-outline-variant/30">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="material-symbols-outlined text-primary bg-primary-fixed p-2 rounded-lg">receipt_long</span>
+                            
+                        </div>
+            <p class="text-on-surface-variant font-label-md text-label-md">Tổng đơn hàng</p>
+            <h3 class="text-headline-md font-headline-md mt-1">@Model.TotalOrders</h3>
+                    </div>
+
+                    <div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-outline-variant/30">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="material-symbols-outlined text-tertiary bg-tertiary-fixed p-2 rounded-lg">pending_actions</span>
+                            
+                        </div>
+            <p class="text-on-surface-variant font-label-md text-label-md">Đang chờ xử lý</p>
+                        <h3 class="text-headline-md font-headline-md mt-1">@Model.PendingOrders</h3>
+                    </div>
+
+                    <div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-outline-variant/30">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="material-symbols-outlined text-secondary bg-secondary-fixed p-2 rounded-lg">payments</span>
+                            
+                        </div>
+            <p class="text-on-surface-variant font-label-md text-label-md">Doanh thu</p>
+                        <h3 class="text-headline-md font-headline-md mt-1">
+                            @Model.Revenue.ToString("N0") đ
+                        </h3>
+                    </div>
+
+                    <div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-outline-variant/30">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="material-symbols-outlined text-error bg-error-container p-2 rounded-lg">cancel</span>
+                           
+                        </div>
+            <p class="text-on-surface-variant font-label-md text-label-md">Đã hủy</p>
+                        <h3 class="text-headline-md font-headline-md mt-1">@Model.CancelledOrders</h3>
+                    </div>
+                </div>
+
+                <div class="bg-white border-x border-b border-outline-variant/30 rounded-b-2xl overflow-hidden shadow-sm">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-surface-container-low/50">
+                    <th class="px-6 py-4 font-label-sm text-label-sm text-on-surface-variant border-b border-outline-variant/30 uppercase tracking-wider">Mã đơn hàng</th>
+                    <th class="px-6 py-4 font-label-sm text-label-sm text-on-surface-variant border-b border-outline-variant/30 uppercase tracking-wider">Tên khách hàng</th>
+                    <th class="px-6 py-4 font-label-sm text-label-sm text-on-surface-variant border-b border-outline-variant/30 uppercase tracking-wider">Tổng tiền</th>
+                    <th class="px-6 py-4 font-label-sm text-label-sm text-on-surface-variant border-b border-outline-variant/30 uppercase tracking-wider">Phương thức thanh toán</th>
+                    <th class="px-6 py-4 font-label-sm text-label-sm text-on-surface-variant border-b border-outline-variant/30 uppercase tracking-wider">Trạng thái</th>
+                    <th class="px-6 py-4 font-label-sm text-label-sm text-on-surface-variant border-b border-outline-variant/30 uppercase tracking-wider text-right">Thao tác</th>
+                            </tr>
+                        </thead>
+
+                        <tbody class="divide-y divide-outline-variant/20">
+                            @if (Model.Orders == null || Model.Orders.Items == null || !Model.Orders.Items.Any())
+                            {
+                                <tr>
+                                    <td colspan="6" class="px-6 py-8 text-center text-on-surface-variant">
+                                        Chưa có đơn hàng nào.
+                                    </td>
+                                </tr>
+                            }
+                            else
+                            {
+                                foreach (var order in Model.Orders.Items)
+                                {
+                                    <tr class="hover:bg-surface-container-low/30 transition-colors group">
+                                        <td class="px-6 py-4 font-label-md text-label-md text-primary font-bold">
+                                            @GetOrderCode(order.Id)
+                                        </td>
+
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-center">
+                                                <div class="w-8 h-8 rounded-full bg-secondary-fixed flex items-center justify-center text-secondary font-bold text-[10px] mr-3">
+                                                    @GetCustomerInitials(order.user)
+                                                </div>
+                                                <span class="font-body-md text-body-md text-on-surface">
+                                                    @(order.user ?? "Unknown Customer")
+                                                </span>
+                                            </div>
+                                        </td>
+
+                                        <td class="px-6 py-4 font-body-md text-body-md font-semibold text-on-surface">
+                                            @order.TotalAmount.ToString("N0") đ
+                                        </td>
+
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-center gap-2">
+                                                <span class="material-symbols-outlined text-on-surface-variant text-[18px]">
+                                                    @GetPaymentIcon(order.PaymentMethod)
+                                                </span>
+                                                <span class="font-body-sm text-body-sm text-on-surface-variant">
+                                                    @order.PaymentMethod
+                                                </span>
+                                            </div>
+                                        </td>
+
+                                        <td class="px-6 py-4">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium @GetStatusClass(order.Status)">
+                                                <span class="w-1.5 h-1.5 rounded-full @GetStatusDotClass(order.Status) mr-1.5"></span>
+                                                @order.Status
+                                            </span>
+                                        </td>
+
+                                        <td class="px-6 py-4 text-right">
+                                            <button type="button"
+                                                    data-order-id="@order.Id"
+                                                    class="order-detail-btn p-2 hover:bg-surface-container-low rounded-lg transition-colors text-on-surface-variant inline-flex">
+
+                                                <span class="material-symbols-outlined">
+                                                    visibility
+                                                </span>
+                                            </button>
+
+                                <div class="relative inline-block">
+
+                                    <button type="button"
+                                            class="order-action-toggle p-2 rounded-lg hover:bg-surface-container-high text-on-surface-variant transition-all ml-1">
+                                        <span class="material-symbols-outlined">
+                                            more_vert
+                                        </span>
+                                    </button>
+
+                                    <div class="order-action-menu hidden absolute right-0 top-12 w-56 bg-white border border-outline-variant rounded-xl shadow-xl overflow-hidden z-50">
+
+                                        @if (order.Status == OrderStatus.Pending)
+                                        {
+                                            <button type="button"
+                                                    class="confirm-order-btn w-full flex items-center gap-3 px-4 py-3 hover:bg-green-50 transition-colors"
+                                                    data-order-id="@order.Id">
+
+                                                <span class="material-symbols-outlined text-green-600">
+                                                    check_circle
+                                                </span>
+
+                                                <span class="text-sm text-gray-700">
+                                                    Xác nhận đơn
+                                                </span>
+                                            </button>
+                                        }
+
+                                        @if (order.Status != OrderStatus.Cancelled &&
+                                                                        order.Status != OrderStatus.Completed)
+                                        {
+                                            <button type="button"
+                                                    class="update-order-status-btn w-full flex items-center gap-3 px-4 py-3 hover:bg-blue-50 transition-colors"
+                                                    data-order-id="@order.Id">
+
+                                                <span class="material-symbols-outlined text-blue-600">
+                                                    local_shipping
+                                                </span>
+
+                                                <span class="text-sm text-gray-700">
+                                                    Cập nhật trạng thái
+                                                </span>
+                                            </button>
+
+                                            <button type="button"
+                                                    class="cancel-order-btn w-full flex items-center gap-3 px-4 py-3 hover:bg-red-50 transition-colors"
+                                                    data-order-id="@order.Id">
+
+                                                <span class="material-symbols-outlined text-red-600">
+                                                    cancel
+                                                </span>
+
+                                                <span class="text-sm text-gray-700">
+                                                    Hủy đơn
+                                                </span>
+                                            </button>
+                                        }
+
+                                        <button type="button"
+                                                class="risk-analysis-btn w-full flex items-center gap-3 px-4 py-3 hover:bg-yellow-50 transition-colors"
+                                                data-order-id="@order.Id">
+
+                                            <span class="material-symbols-outlined text-yellow-600">
+                                                warning
+                                            </span>
+
+                                            <span class="text-sm text-gray-700">
+                                                Phân tích rủi ro
+                                            </span>
+                                        </button>
+
+                                    </div>
+
+                                </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Pagination -->
+    @if (Model.Orders != null && Model.Orders.TotalPages > 1)
+    {
+        <div class="px-6 py-4 bg-surface-container-low border-t border-outline-variant flex items-center justify-between">
+
+            <div class="flex items-center gap-2">
+
+                @if (Model.Orders.HasPreviousPage)
+                {
+                    <button type="button"
+                            data-page="@(Model.Orders.PageIndex - 1)"
+                            class="order-page-btn p-2 rounded-lg border border-outline-variant hover:bg-surface transition-colors">
+                        <span class="material-symbols-outlined text-[20px]">
+                            chevron_left
+                        </span>
+                    </button>
+                }
+                else
+                {
+                    <button type="button"
+                            disabled
+                            class="p-2 rounded-lg border border-outline-variant opacity-50 transition-colors">
+                        <span class="material-symbols-outlined text-[20px]">
+                            chevron_left
+                        </span>
+                    </button>
+                }
+
+                @for (int i = 1; i <= Model.Orders.TotalPages; i++)
+                {
+                    <button type="button"
+                            data-page="@i"
+                            class="order-page-btn w-8 h-8 rounded-lg font-label-md text-label-md flex items-center justify-center transition-colors
+                                       @(i == Model.Orders.PageIndex
+                                                               ? "bg-primary text-on-primary"
+                                                               : "hover:bg-surface-container-high")">
+                @i
+            </button>
+                        }
+
+                @if (Model.Orders.HasNextPage)
+                {
+                    <button type="button"
+                            data-page="@(Model.Orders.PageIndex + 1)"
+                            class="order-page-btn p-2 rounded-lg border border-outline-variant hover:bg-surface transition-colors">
+                        <span class="material-symbols-outlined text-[20px]">
+                            chevron_right
+                        </span>
+                    </button>
+                }
+                else
+                {
+                    <button type="button"
+                            disabled
+                            class="p-2 rounded-lg border border-outline-variant opacity-50 transition-colors">
+                        <span class="material-symbols-outlined text-[20px]">
+                            chevron_right
+                        </span>
+                    </button>
+                }
+
+            </div>
+
+        </div>
+    }
+</div>
+
+

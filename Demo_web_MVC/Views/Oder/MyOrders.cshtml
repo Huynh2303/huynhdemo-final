@@ -1,0 +1,74 @@
+﻿@model List<Demo_web_MVC.Models.ViewModel.Oder.OderViewModel>
+
+<div class="space-y-6">
+
+    @foreach (var order in Model)
+    {
+        <div class="bg-white rounded-2xl shadow-sm border p-5">
+
+            <!-- Header -->
+            <div class="flex justify-between items-center border-b pb-3 mb-4">
+
+                <div>
+                    <p class="font-semibold">
+                        Đơn hàng #@order.Id
+                    </p>
+
+                    <p class="text-sm text-gray-500">
+                        @(order.CreateAt?.ToString("dd/MM/yyyy HH:mm") ?? "")
+                    </p>
+                </div>
+
+                <span class="text-primary font-medium">
+                    @order.Status
+                </span>
+            </div>
+
+            <!-- Product -->
+            <div class="space-y-3">
+
+                @foreach (var item in order.Items)
+                {
+                    <div class="flex items-center gap-4">
+
+                        <img src="@item.Img"
+                             class="w-20 h-20 object-cover rounded-lg" />
+
+                        <div class="flex-1">
+                            <p class="font-medium">
+                                @item.Name
+                            </p>
+
+                            <p class="text-sm text-gray-500">
+                                SL: @item.Quantity
+                            </p>
+                        </div>
+
+                        <p class="font-semibold text-primary">
+                            @string.Format("{0:N0}đ", item.Price)
+                        </p>
+                    </div>
+                }
+            </div>
+
+            <!-- Footer -->
+            <div class="flex justify-between items-center mt-5 pt-4 border-t">
+
+                <p class="font-semibold">
+                    Tổng tiền:
+                    <span class="text-primary">
+                        @string.Format("{0:N0}đ", order.TotalAmount)
+                    </span>
+                </p>
+
+                <a asp-action="Details"
+                   asp-route-orderId="@order.Id"
+                   class="px-4 py-2 rounded-xl bg-primary text-white no-underline">
+                    Xem chi tiết
+                </a>
+            </div>
+
+        </div>
+    }
+
+</div>

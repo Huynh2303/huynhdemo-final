@@ -1,0 +1,72 @@
+﻿@model List<Demo_web_MVC.Models.ViewModel.NotificationViewModel>
+
+@{
+    var unreadCount = ViewBag.UnreadCount ?? 0;
+}
+
+<div class="relative group">
+    <a asp-controller="Notifications"
+       asp-action="Index"
+       class="relative inline-flex items-center justify-center w-10 h-10 rounded-full hover:bg-slate-100 transition"
+       title="Thông báo">
+
+        <span class="material-symbols-outlined text-slate-700">
+            notifications
+        </span>
+
+        @if (unreadCount > 0)
+        {
+            <span class="absolute -top-1 -right-1 min-w-[18px] h-[18px]
+                             px-1 rounded-full bg-red-500 text-white text-[10px]
+                             font-bold flex items-center justify-center">
+                @unreadCount
+            </span>
+        }
+    </a>
+
+    <div class="hidden group-hover:block absolute right-0 top-full pt-2 z-[99999]">
+        <div class="w-[400px] bg-white border border-slate-200 shadow-xl rounded-lg overflow-hidden">
+
+            <div class="px-4 py-3 font-semibold border-b">
+                Thông báo
+            </div>
+
+            @if (Model != null && Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                    <a asp-controller="Notifications"
+                       asp-action="Open"
+                       asp-route-id="@item.Id"
+                       class="block px-4 py-3 border-b hover:bg-slate-50 transition
+                                      @(item.IsRead ? "bg-white" : "bg-sky-50")">
+
+                        <div class="font-semibold text-sm text-slate-800">
+                            @item.Title
+                        </div>
+
+                        <div class="text-sm text-slate-500 line-clamp-2">
+                            @item.Content
+                        </div>
+
+                        <div class="text-xs text-slate-400 mt-1">
+                            @item.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                        </div>
+                    </a>
+                }
+            }
+            else
+            {
+                <div class="px-4 py-6 text-center text-sm text-slate-500">
+                    Chưa có thông báo nào
+                </div>
+            }
+
+            <a asp-controller="Notifications"
+               asp-action="Index"
+               class="block px-4 py-3 text-center text-sm font-semibold text-sky-600 hover:bg-slate-50">
+                Xem tất cả
+            </a>
+        </div>
+    </div>
+</div>

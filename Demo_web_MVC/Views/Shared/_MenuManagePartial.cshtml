@@ -1,0 +1,60 @@
+﻿
+<div class="relative inline-block" style="position: relative; display: inline-block;">
+
+    <!-- Button: Thêm onmouseenter/mouseleave để chắc chắn 100% -->
+    <button type="button"
+            onmouseenter="document.getElementById('user-dropdown').style.display='block'"
+            class="flex items-center justify-center p-2 rounded-full hover:bg-gray-200 transition-all border-0 bg-transparent"
+            style="cursor: pointer; border: none; background: transparent; padding: 8px;">
+        <span class="material-symbols-outlined" style="font-size: 32px; color: #4b5563;">
+            account_circle
+        </span>
+    </button>
+
+    <!-- Dropdown Menu: Dùng ID và Inline Style để kiểm soát -->
+    <div id="user-dropdown"
+         onmouseleave="this.style.display='none'"
+         class="absolute right-0 w-48 z-[9999]"
+         style="display: none; position: absolute; right: 0; top: 100%; width: 200px; padding-top: 8px; z-index: 9999;">
+
+        <div class="bg-white rounded-md shadow-xl border border-gray-100 overflow-hidden"
+             style="background-color: white; border-radius: 6px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border: 1px solid #f3f4f6;">
+
+            <div class="flex flex-col py-1">
+                <a asp-action="Index" asp-controller="Home" class="flex items-center px-4 py-3 text-sm text-gray-700 no-underline hover:bg-blue-50 hover:text-blue-600" style="display: flex; align-items: center; padding: 8px 16px; text-decoration: none; color: #374151; font-size: 14px;">
+                    <span class="material-symbols-outlined" style="margin-right: 12px; font-size: 20px;">person</span>
+                    Tài khoản của tôi
+                </a>
+                
+                <a href="/Home/Index"
+                   onclick="localStorage.setItem('defaultTab','OrderHistory')"
+                   class="flex items-center px-4 py-3 text-sm text-gray-700 no-underline hover:bg-blue-50 hover:text-blue-600">
+
+                    <span class="material-symbols-outlined"
+                          style="margin-right: 12px; font-size: 20px;">
+                        package_2
+                    </span>
+
+                    Đơn hàng
+                </a>
+                
+                @if (User.IsInRole("STAFF"))
+{
+                <a asp-action="Dashboard" asp-controller="Seller" class="flex items-center px-4 py-3 text-sm text-gray-700 no-underline hover:bg-blue-50 hover:text-blue-600" style="display: flex; align-items: center; padding: 8px 16px; text-decoration: none; color: #374151; font-size: 14px;">
+                    <span class="material-symbols-outlined" style="margin-right: 12px; font-size: 20px;">person</span>
+                    Trang bán hàng của bạn 
+                </a>
+}
+                <div style="height: 1px; background-color: #f3f4f6; margin: 4px 0;"></div>
+                @if (User.Identity!.IsAuthenticated)
+                {
+                    <a asp-action="Logout" asp-controller="User" class="flex items-center px-4 py-3 text-sm text-red-500 no-underline hover:bg-red-50" style="display: flex; align-items: center; padding: 8px 16px; text-decoration: none; color: #ef4444; font-size: 14px;">
+                    <span class="material-symbols-outlined" style="margin-right: 12px; font-size: 20px;">logout</span>
+                    Đăng xuất
+                     </a>
+                }
+                
+            </div>
+        </div>
+    </div>
+</div>

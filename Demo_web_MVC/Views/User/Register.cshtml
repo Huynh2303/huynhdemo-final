@@ -1,0 +1,192 @@
+﻿
+
+<!DOCTYPE html>
+
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&amp;display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-bright": "#f5faff",
+                        "on-tertiary-fixed-variant": "#6b3b00",
+                        "on-secondary-fixed-variant": "#454747",
+                        "primary-fixed": "#c6e7ff",
+                        "outline-variant": "#bdc8d1",
+                        "on-secondary-fixed": "#1a1c1c",
+                        "primary": "#00658d",
+                        "on-tertiary-fixed": "#2d1600",
+                        "secondary": "#5d5f5f",
+                        "on-tertiary-container": "#572f00",
+                        "on-primary-fixed-variant": "#004c6b",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-fixed": "#e2e2e2",
+                        "on-primary-fixed": "#001e2d",
+                        "on-secondary-container": "#616363",
+                        "primary-fixed-dim": "#82cfff",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#ffb876",
+                        "secondary-container": "#dfe0e0",
+                        "on-surface-variant": "#3e4850",
+                        "surface-container-highest": "#dee3e8",
+                        "on-surface": "#171c20",
+                        "on-primary": "#ffffff",
+                        "on-primary-container": "#003e58",
+                        "surface-tint": "#00658d",
+                        "surface": "#f5faff",
+                        "surface-container": "#eaeef4",
+                        "surface-container-high": "#e4e9ee",
+                        "tertiary-container": "#ea8c21",
+                        "inverse-on-surface": "#ecf1f7",
+                        "on-tertiary": "#ffffff",
+                        "background": "#f5faff",
+                        "on-background": "#171c20",
+                        "tertiary": "#8d4f00",
+                        "surface-dim": "#d6dae0",
+                        "secondary-fixed-dim": "#c6c6c7",
+                        "outline": "#6e7881",
+                        "error": "#ba1a1a",
+                        "on-error": "#ffffff",
+                        "inverse-surface": "#2c3135",
+                        "surface-variant": "#dee3e8",
+                        "surface-container-low": "#eff4fa",
+                        "inverse-primary": "#82cfff",
+                        "tertiary-fixed": "#ffdcc0",
+                        "on-secondary": "#ffffff",
+                        "primary-container": "#00aeef",
+                        "on-error-container": "#93000a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "gutter": "16px",
+                        "xl": "48px",
+                        "unit": "4px",
+                        "lg": "24px",
+                        "md": "16px",
+                        "sm": "8px",
+                        "container-max": "1200px"
+                    },
+                    "fontFamily": {
+                        "price-lg": ["Be Vietnam Pro"],
+                        "headline-md": ["Be Vietnam Pro"],
+                        "label-bold": ["Be Vietnam Pro"],
+                        "body-sm": ["Be Vietnam Pro"],
+                        "display-lg": ["Be Vietnam Pro"],
+                        "body-base": ["Be Vietnam Pro"]
+                    },
+                    "fontSize": {
+                        "price-lg": ["24px", {"lineHeight": "1", "fontWeight": "700"}],
+                        "headline-md": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "label-bold": ["12px", {"lineHeight": "1.2", "letterSpacing": "0.02em", "fontWeight": "700"}],
+                        "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "display-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "body-base": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .form-input-focus:focus {
+            border-color: #00aeef;
+            box-shadow: 0 0 0 2px rgba(0, 174, 239, 0.1);
+            outline: none;
+        }
+    </style>
+</head>
+@model Demo_web_MVC.Models.ViewModel.RegisterViewModel
+<body class="bg-surface font-body-base text-on-surface">
+    
+    <main class="min-h-[calc(100vh-160px)] flex items-center justify-center py-xl px-gutter">
+        <!-- Main Auth Canvas -->
+        <div class="w-full max-w-[480px] bg-white rounded-xl shadow-[0px_4px_12px_rgba(0,0,0,0.05)] p-lg border border-gray-100">
+            <!-- Identity Section -->
+            <div class="text-center mb-lg">
+                <h1 class="font-display-lg text-display-lg text-on-surface mb-2">Đăng ký</h1>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">Tham gia cộng đồng mua sắm ASP .NET ngay hôm nay</p>
+            </div>
+            <form asp-action="Register" asp-controller="User" class="space-y-md" method="post">
+                <div asp-validation-summary="ModelOnly"
+                     class="text-error text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-2">
+                </div>
+                <!-- Username Field -->
+                <div class="space-y-xs">
+                    <label asp-for="Username" class="font-label-bold text-label-bold text-on-surface-variant block">Tên đăng nhập</label>
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">person</span>
+                        <input asp-for="Username" class="w-full pl-10 pr-4 py-3 rounded-lg border border-outline-variant bg-surface-container-lowest font-body-base text-body-base form-input-focus transition-all" placeholder="Nhập username" />
+                    </div>
+                    <span asp-validation-for="Username" class="font-label-bold text-[11px] text-error"></span>
+                </div>
+                <!-- Email Field -->
+                <div class="space-y-xs">
+                    <label asp-for="Email" class="font-label-bold text-label-bold text-on-surface-variant block">EMAIL</label>
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">mail</span>
+                        <input asp-for="Email" class="w-full pl-10 pr-4 py-3 rounded-lg border border-outline-variant bg-surface-container-lowest font-body-base text-body-base form-input-focus transition-all" placeholder="Nhập email" type="email" />
+                    </div>
+                    <span asp-validation-for="Email" class="font-label-bold text-[11px] text-error"></span>
+                </div>
+                <!-- FullName Field -->
+                <div class="space-y-xs">
+                    <label asp-for="FullName" class="font-label-bold text-label-bold text-on-surface-variant block">HỌ TÊN</label>
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">badge</span>
+                        <input asp-for="FullName" class="w-full pl-10 pr-4 py-3 rounded-lg border border-outline-variant bg-surface-container-lowest font-body-base text-body-base form-input-focus transition-all" placeholder="Nhập họ tên" />
+                    </div>
+                    <span asp-validation-for="FullName" class="font-label-bold text-[11px] text-error"></span>
+                </div>
+                <!-- Password Field -->
+                <div class="space-y-xs">
+                    <label asp-for="Password" class="font-label-bold text-label-bold text-on-surface-variant block">MẬT KHẨU</label>
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">lock</span>
+                        <input asp-for="Password" class="w-full pl-10 pr-4 py-3 rounded-lg border border-outline-variant bg-surface-container-lowest font-body-base text-body-base form-input-focus transition-all" placeholder="Nhập mật khẩu" type="password" />
+                    </div>
+                    <span asp-validation-for="Password" class="font-label-bold text-[11px] text-error"></span>
+                </div>
+                <!-- Action Area -->
+                <div class="pt-sm">
+                    <button class="w-full bg-primary-container text-white py-3 rounded-lg font-headline-md text-headline-md active:scale-95 transition-transform shadow-md hover:brightness-110" type="submit">
+                        Đăng ký
+                    </button>
+                </div>
+                <!-- Social/Redirect Logic -->
+                <div class="flex flex-col items-center gap-4 mt-md">
+                    <div class="flex items-center w-full gap-2">
+                        <div class="h-[1px] bg-outline-variant flex-1"></div>
+                        <span class="text-body-sm text-outline font-label-bold">HOẶC</span>
+                        <div class="h-[1px] bg-outline-variant flex-1"></div>
+                    </div>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant">
+                        Bạn đã có tài khoản?
+                        <a asp-action="Login" class="text-primary-container font-label-bold hover:underline">Đăng nhập</a>
+                    </p>
+                </div>
+            </form>
+        </div>
+    </main>
+    @section Scripts {
+        <partial name="_ValidationScriptsPartial"></partial>
+    }
+
+</body>
+</html>

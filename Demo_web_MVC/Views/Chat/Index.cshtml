@@ -1,0 +1,38 @@
+﻿@model List<Demo_web_MVC.Models.Conversation>
+
+@{
+    ViewData["Title"] = "Tin nhắn";
+}
+
+<div class="max-w-7xl mx-auto p-lg">
+
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+
+        <div class="px-lg py-md border-b border-slate-200">
+            <h2 class="text-xl font-bold">
+                Tin nhắn
+            </h2>
+        </div>
+
+        <div id="conversationContainer" class="p-lg space-y-3 bg-slate-50">
+            <partial name="_ConversationList" model="Model" />
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    async function loadConversations() {
+        const response = await fetch('/Chat/ConversationList');
+
+        if (!response.ok)
+            return;
+
+        const html = await response.text();
+
+        document.getElementById("conversationContainer").innerHTML = html;
+    }
+
+    setInterval(loadConversations, 3000);
+</script>

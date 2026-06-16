@@ -1,0 +1,217 @@
+﻿@model Demo_web_MVC.Models.ViewModel.Admin.AdminViewModel
+
+@{
+
+    string GetStatusClass(OrderStatus status)
+    {
+        return status switch
+        {
+            OrderStatus.Completed => "bg-green-100 text-green-700",
+            OrderStatus.Pending => "bg-amber-100 text-amber-700",
+            OrderStatus.Confirmed => "bg-blue-100 text-blue-700",
+            OrderStatus.Shipping => "bg-purple-100 text-purple-700",
+            OrderStatus.Cancelled => "bg-red-100 text-red-700",
+            _ => "bg-gray-100 text-gray-700"
+        };
+    }
+
+    string GetAvatarText(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return "U";
+
+        var parts = name.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+        if (parts.Length == 1)
+            return parts[0][0].ToString().ToUpper();
+
+        return $"{parts[0][0]}{parts[^1][0]}".ToUpper();
+    }
+}
+<div class="mb-8">
+    <h2 class="font-headline-lg text-headline-lg text-on-surface mb-1">
+        Dashboard
+    </h2>
+    <p class="font-body-md text-body-md text-on-surface-variant">
+        Tổng quan hoạt động hệ thống
+    </p>
+</div>
+
+<!-- Statistic Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+
+    <div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-outline-variant/30 hover:shadow-md transition-shadow">
+        <div class="flex justify-between items-start mb-4">
+            <div class="p-3 bg-primary-fixed/30 text-primary rounded-xl">
+                <span class="material-symbols-outlined">payments</span>
+            </div>
+        </div>
+
+        <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">
+            TỔNG DOANH THU
+        </p>
+        <p class="font-display-lg text-display-lg text-on-surface">
+            @Model.TotalRevenue.ToString("N0") đ
+        </p>
+        <p class="text-xs text-on-surface-variant mt-2">
+            Doanh thu đơn hoàn thành
+        </p>
+    </div>
+
+    <div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-outline-variant/30 hover:shadow-md transition-shadow">
+        <div class="flex justify-between items-start mb-4">
+            <div class="p-3 bg-primary-fixed/30 text-primary rounded-xl">
+                <span class="material-symbols-outlined">shopping_bag</span>
+            </div>
+        </div>
+
+        <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">
+            TỔNG ĐƠN HÀNG
+        </p>
+        <p class="font-display-lg text-display-lg text-on-surface">
+            @Model.TotalOrders
+        </p>
+        <p class="text-xs text-on-surface-variant mt-2">
+            Tổng số đơn hàng
+        </p>
+    </div>
+
+    <div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-outline-variant/30 hover:shadow-md transition-shadow">
+        <div class="flex justify-between items-start mb-4">
+            <div class="p-3 bg-primary-fixed/30 text-primary rounded-xl">
+                <span class="material-symbols-outlined">inventory</span>
+            </div>
+        </div>
+
+        <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">
+            TỔNG SẢN PHẨM
+        </p>
+        <p class="font-display-lg text-display-lg text-on-surface">
+            @Model.TotalProducts
+        </p>
+        <p class="text-xs text-on-surface-variant mt-2">
+            Tổng sản phẩm
+        </p>
+    </div>
+
+    <div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-outline-variant/30 hover:shadow-md transition-shadow">
+        <div class="flex justify-between items-start mb-4">
+            <div class="p-3 bg-primary-fixed/30 text-primary rounded-xl">
+                <span class="material-symbols-outlined">group</span>
+            </div>
+        </div>
+
+        <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">
+            TỔNG NGƯỜI DÙNG
+        </p>
+        <p class="font-display-lg text-display-lg text-on-surface">
+            @Model.TotalUsers
+        </p>
+        <p class="text-xs text-on-surface-variant mt-2">
+            Tổng người dùng
+        </p>
+    </div>
+
+</div>
+
+<!-- Recent Orders -->
+<div class="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 overflow-hidden">
+
+    <div class="px-6 py-5 border-b border-outline-variant/30 flex justify-between items-center">
+        <h3 class="font-headline-sm text-headline-sm text-on-surface">
+            Đơn hàng gần đây
+        </h3>
+
+        
+        <button type="button"
+                id="view-all-orders-btn"
+                class="text-primary font-label-md text-label-md hover:underline no-underline">
+            Xem tất cả đơn hàng
+        </button>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+
+            <thead>
+                <tr class="bg-surface-container-low/50">
+                    <th class="px-6 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+                        MÃ ĐƠN HÀNG
+                    </th>
+                    <th class="px-6 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+                        KHÁCH HÀNG
+                    </th>
+                    <th class="px-6 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+                        TỔNG TIỀN
+                    </th>
+                    <th class="px-6 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+                        TRẠNG THÁI
+                    </th>
+                    <th class="px-6 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider text-right">
+                        THAO TÁC
+                    </th>
+                </tr>
+            </thead>
+
+            <tbody class="divide-y divide-outline-variant/30">
+
+                @if (Model.oderViewModels != null && Model.oderViewModels.Any())
+                {
+                    foreach (var order in Model.oderViewModels)
+                    {
+                        <tr class="hover:bg-surface-container-low/30 transition-colors">
+
+                            <td class="px-6 py-4 font-body-md text-body-md font-medium text-on-surface">
+                                #ORD-@order.Id
+                            </td>
+
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-secondary-fixed flex items-center justify-center text-xs font-bold text-primary">
+                                        @GetAvatarText(order.user)
+                                    </div>
+
+                                    <span class="font-body-md text-body-md text-on-surface">
+                                        @order.user
+                                    </span>
+                                </div>
+                            </td>
+
+                            <td class="px-6 py-4 font-body-md text-body-md text-on-surface">
+                                @order.TotalAmount.ToString("N0") đ
+                            </td>
+
+                            <td class="px-6 py-4">
+                                <span class="px-3 py-1 rounded-full text-xs font-bold @GetStatusClass(order.Status)">
+                                    @order.Status
+                                </span>
+                            </td>
+
+                            <td class="px-6 py-4 text-right">
+                                <button type="button"
+                                        data-order-id="@order.Id"
+                                        class="order-detail-btn p-2 hover:bg-surface-container-low rounded-lg transition-colors text-on-surface-variant inline-flex">
+
+                                    <span class="material-symbols-outlined">
+                                        visibility
+                                    </span>
+                                </button>
+                            </td>
+
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" class="px-6 py-8 text-center text-on-surface-variant">
+                            Chưa có đơn hàng nào
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+    </div>
+</div>

@@ -1,0 +1,175 @@
+﻿@model Demo_web_MVC.Models.ViewModel.LoginViewModel;
+<!DOCTYPE html>
+
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Login - VibrantShop</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary": "#ffffff",
+                        "on-secondary-container": "#616363",
+                        "background": "#f5faff",
+                        "surface-container-highest": "#dee3e8",
+                        "surface-dim": "#d6dae0",
+                        "secondary-container": "#dfe0e0",
+                        "outline-variant": "#bdc8d1",
+                        "inverse-primary": "#82cfff",
+                        "surface-variant": "#dee3e8",
+                        "tertiary-fixed": "#ffdcc0",
+                        "surface-container-low": "#eff4fa",
+                        "tertiary": "#8d4f00",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed-variant": "#454747",
+                        "on-primary-fixed-variant": "#004c6b",
+                        "tertiary-container": "#ea8c21",
+                        "primary": "#00658d",
+                        "error": "#ba1a1a",
+                        "primary-fixed-dim": "#82cfff",
+                        "on-primary": "#ffffff",
+                        "inverse-on-surface": "#ecf1f7",
+                        "surface-tint": "#00658d",
+                        "primary-fixed": "#c6e7ff",
+                        "on-surface": "#171c20",
+                        "on-background": "#171c20",
+                        "surface-container": "#eaeef4",
+                        "on-primary-container": "#003e58",
+                        "surface-container-high": "#e4e9ee",
+                        "secondary-fixed": "#e2e2e2",
+                        "surface-bright": "#f5faff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface": "#f5faff",
+                        "primary-container": "#00aeef",
+                        "tertiary-fixed-dim": "#ffb876",
+                        "inverse-surface": "#2c3135",
+                        "on-tertiary-fixed-variant": "#6b3b00",
+                        "on-tertiary-fixed": "#2d1600",
+                        "on-secondary-fixed": "#1a1c1c",
+                        "on-primary-fixed": "#001e2d",
+                        "secondary-fixed-dim": "#c6c6c7",
+                        "on-error": "#ffffff",
+                        "on-tertiary-container": "#572f00",
+                        "error-container": "#ffdad6",
+                        "secondary": "#5d5f5f",
+                        "outline": "#6e7881",
+                        "on-surface-variant": "#3e4850",
+                        "on-error-container": "#93000a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "sm": "8px",
+                        "gutter": "16px",
+                        "xl": "48px",
+                        "container-max": "1200px",
+                        "unit": "4px",
+                        "md": "16px",
+                        "lg": "24px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Be Vietnam Pro"],
+                        "body-sm": ["Be Vietnam Pro"],
+                        "body-base": ["Be Vietnam Pro"],
+                        "price-lg": ["Be Vietnam Pro"],
+                        "label-bold": ["Be Vietnam Pro"],
+                        "headline-md": ["Be Vietnam Pro"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "body-base": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "price-lg": ["24px", {"lineHeight": "1", "fontWeight": "700"}],
+                        "label-bold": ["12px", {"lineHeight": "1.2", "letterSpacing": "0.02em", "fontWeight": "700"}],
+                        "headline-md": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .login-card-shadow {
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+            .login-card-shadow:hover {
+                box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.1);
+            }
+    </style>
+</head>
+<body class="bg-surface font-body-base text-on-surface min-h-screen flex flex-col">
+   
+    <!-- Main Content (Razor Context) -->
+    <main class="flex-grow flex items-center justify-center py-xl px-6">
+        <div class="w-full max-w-[440px]">
+            <div class="bg-surface-container-lowest login-card-shadow rounded-xl p-lg md:p-xl transition-all duration-300">
+                <div class="text-center mb-lg">
+                    <h1 class="font-display-lg text-display-lg text-on-surface mb-xs">Đăng nhập</h1>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant">Đăng nhập để để tham gia mua hàng</p>
+                </div>
+
+                
+                <form asp-action="Login" asp-controller="User" class="space-y-gutter" method="post">
+                    <div asp-validation-summary="ModelOnly"
+                         class="text-red-500 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-2">
+                    </div>
+
+                    <div class="space-y-xs">
+                        <label class="font-label-bold text-label-bold text-on-surface-variant block px-1" for="UsernameOrEmail">Tên đăng nhập hoặc Email</label>
+                        <div class="relative">
+                            <input class="w-full px-md py-3 rounded-lg border border-outline-variant bg-surface-bright focus:ring-2 focus:ring-primary-container focus:border-primary-container outline-none transition-all duration-200 placeholder:text-outline" id="UsernameOrEmail" name="UsernameOrEmail" placeholder="name@example.com" type="text" />
+                        </div>
+                        <span asp-validation-for="UsernameOrEmail"
+                              class="text-red-500 text-sm block px-1">
+                        </span>
+                    </div>
+                    <div class="space-y-xs">
+                        <div class="flex justify-between items-center px-1">
+                            <label class="font-label-bold text-label-bold text-on-surface-variant" for="Password">Mật khẩu</label>
+                            <a asp-action="ForgotPassword" asp-controller="User" class="font-label-bold text-label-bold text-primary-container hover:underline underline-offset-4" >Quên mật khẩu?</a>
+                        </div>
+                        <div class="relative">
+                            <input class="w-full px-md py-3 rounded-lg border border-outline-variant bg-surface-bright focus:ring-2 focus:ring-primary-container focus:border-primary-container outline-none transition-all duration-200 placeholder:text-outline" id="Password" name="Password" placeholder="••••••••" type="password" />
+                        </div>
+                        <span asp-validation-for="Password"
+      class="text-red-500 text-sm block px-1">
+</span>
+                       
+                    </div>
+                    
+                    <button class="w-full bg-primary-container text-on-primary font-headline-md py-md rounded-lg shadow-md hover:brightness-110 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-sm" type="submit">
+                        <span>Đăng nhập</span>
+                        <span class="material-symbols-outlined" data-icon="Đăng Nhập">login </span>
+                    </button>
+                </form>
+                <div class="mt-xl text-center space-y-md">
+                    
+                    <p class="font-body-sm text-body-sm text-on-surface-variant">
+                        Nếu chưa có tài khoản?
+                        <a asp-action="Register" asp-controller="User" class="text-primary-container font-headline-md text-sm hover:underline underline-offset-4" >Đăng ký</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+   
+    
+</body>
+</html>

@@ -1,0 +1,174 @@
+﻿@model Demo_web_MVC.Models.ViewModel.Admin.CategoryManagementViewModel
+
+<div class="max-w-[1440px] mx-auto p-margin-desktop space-y-10">
+
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+            <h2 class="font-headline-lg text-headline-lg text-on-surface">Quản lý danh mục</h2>
+            <p class="font-body-md text-body-md text-on-surface-variant mt-1">
+                Quản lý và sắp xếp danh mục sản phẩm.
+            </p>
+        </div>
+
+        <button type="button"
+                id="open-add-category-btn"
+                class="flex items-center gap-2 px-6 py-2 bg-primary rounded-full font-label-md text-label-md text-on-primary hover:opacity-90 transition-all shadow-md">
+
+            <span class="material-symbols-outlined text-[20px]">
+                add
+            </span>
+
+            Thêm danh mục
+        </button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant/30 flex items-center gap-4 group hover:shadow-md transition-all">
+            <div class="w-12 h-12 bg-secondary-fixed rounded-xl flex items-center justify-center text-secondary group-hover:scale-110 transition-transform">
+                <span class="material-symbols-outlined">category</span>
+            </div>
+            <div>
+                <p class="font-label-sm text-label-sm text-on-surface-variant">
+                    Tổng danh mục
+                </p>
+                <p class="font-headline-md text-headline-md text-on-surface">@Model.TotalCategories</p>
+            </div>
+        </div>
+    </div>
+
+    <section class="space-y-4">
+        <div class="bg-white rounded-2xl shadow-sm border border-outline-variant/30 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-surface-container-low">
+                            <th class="px-6 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+                                Tên danh mục
+                            </th>
+                            <th class="px-6 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+                                Danh mục cha
+                            </th>
+                            <th class="px-6 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+                                Ngày tạo
+                            </th>
+                            <th class="px-6 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider text-right">
+                                Thao tác
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <tbody class="divide-y divide-outline-variant/20">
+                        @if (Model.Categories != null && Model.Categories.Items.Any())
+                        {
+                            foreach (var category in Model.Categories.Items)
+                            {
+                                <tr class="hover:bg-surface-container-lowest transition-colors group">
+                                    <td class="px-6 py-4 font-body-md text-body-md text-on-surface font-medium">
+                                        @category.Name
+                                    </td>
+
+                                    <td class="px-6 py-4 font-body-md text-body-md text-on-surface-variant">
+                                        @(category.ParentId == null ? "Null" : category.ParentId.ToString())
+                                    </td>
+
+                                    <td class="px-6 py-4 font-body-md text-body-md text-on-surface-variant">
+                                        @category.CreatedAt.ToString("dd/MM/yyyy")
+                                    </td>
+
+                                    <td class="px-6 py-4 text-right">
+                                        <div class="flex items-center justify-end gap-2">
+
+                                            <!-- Nút sửa -->
+                                            <button type="button"
+                                                    class="edit-category-btn p-2 rounded-lg hover:bg-primary-container/10 text-on-surface-variant hover:text-primary transition-colors"
+                                                    data-id="@category.Id"
+                                                    data-name="@category.Name"
+                                                    data-parent-id="@category.ParentId">
+
+                                                <span class="material-symbols-outlined text-[20px]">
+                                                    edit
+                                                </span>
+                                            </button>
+
+                                            <!-- Nút xóa -->
+                                            <button type="button"
+                                                    class="delete-category-btn p-2 rounded-lg hover:bg-error/10 text-on-surface-variant hover:text-error transition-colors"
+                                                    data-id="@category.Id">
+
+                                                <span class="material-symbols-outlined text-[20px]">
+                                                    delete
+                                                </span>
+                                            </button>
+
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="4" class="px-6 py-8 text-center text-on-surface-variant">
+                                    No categories found.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (Model.Categories != null && Model.Categories.TotalPages > 1)
+            {
+                <div class="px-6 py-4 bg-surface-container-low border-t border-outline-variant flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+
+                        @if (Model.Categories.HasPreviousPage)
+                        {
+                            <button type="button"
+                                    data-page="@(Model.Categories.PageIndex - 1)"
+                                    class="category-page-btn p-2 rounded-lg border border-outline-variant hover:bg-surface transition-colors">
+                                <span class="material-symbols-outlined text-[20px]">chevron_left</span>
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="button"
+                                    disabled
+                                    class="p-2 rounded-lg border border-outline-variant opacity-50 transition-colors">
+                                <span class="material-symbols-outlined text-[20px]">chevron_left</span>
+                            </button>
+                        }
+
+                        @for (int i = 1; i <= Model.Categories.TotalPages; i++)
+                        {
+                            <button type="button"
+                                    data-page="@i"
+                                    class="category-page-btn w-8 h-8 rounded-lg font-label-md text-label-md flex items-center justify-center transition-colors
+                                                   @(i == Model.Categories.PageIndex ? "bg-primary text-on-primary" : "hover:bg-surface-container-high")">
+                                @i
+                            </button>
+                        }
+
+                        @if (Model.Categories.HasNextPage)
+                        {
+                            <button type="button"
+                                    data-page="@(Model.Categories.PageIndex + 1)"
+                                    class="category-page-btn p-2 rounded-lg border border-outline-variant hover:bg-surface transition-colors">
+                                <span class="material-symbols-outlined text-[20px]">chevron_right</span>
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="button"
+                                    disabled
+                                    class="p-2 rounded-lg border border-outline-variant opacity-50 transition-colors">
+                                <span class="material-symbols-outlined text-[20px]">chevron_right</span>
+                            </button>
+                        }
+
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+</div>

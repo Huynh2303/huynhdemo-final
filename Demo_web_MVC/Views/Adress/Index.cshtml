@@ -1,0 +1,82 @@
+﻿@model IEnumerable<Demo_web_MVC.Models.ViewModel.Address.AddressViewModel>
+
+@{
+    ViewData["Title"] = "Địa chỉ của tôi";
+}
+
+<link rel="stylesheet" href="~/css/address-index.css" asp-append-version="true" />
+
+<div class="address-page">
+    <div class="address-header">
+        <h2>Địa chỉ của tôi</h2>
+        <a asp-action="Create" asp-controller="Adress" class="btn-add">+ Thêm địa chỉ mới</a>
+    </div>
+    
+    @if (Model != null && Model.Any() )
+    {
+        <div class="address-list">
+            @foreach (var item in Model)
+            {
+                <div class="address-card">
+                    <div class="address-top">
+                        <div class="address-info">
+                            <div class="address-title">
+                                <span class="address-name">Địa chỉ giao hàng</span>
+
+                                @if (item.IsDefault)
+                                {
+                                    <span class="default-badge">Mặc định</span>
+                                }
+                            </div>
+
+                            <div class="address-detail">
+                                <div><strong>Người nhận:</strong> @item.RecipientName</div>
+                                <div><strong>Số điện thoại:</strong> @item.PhoneNumber</div>
+                                <div><strong>Địa chỉ:</strong> @item.AddressLine</div>
+                                <div><strong>Thành phố:</strong> @item.City</div>
+                                <div><strong>Quốc gia:</strong> @item.Country</div>
+                            </div>
+                        </div>
+
+                        <div class="address-actions">
+                            <div class="action-links">
+                                
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="link-edit">Cập nhật</a>
+                                
+                                
+
+                                <form asp-action="Delete" asp-controller="Adress"
+                                      asp-route-id="@item.Id"
+                                      method="post"
+                                      class="inline-form"
+                                      onsubmit="return confirm('Bạn có chắc muốn xóa địa chỉ này không?');">
+                                    <button type="submit" class="link-delete">Xóa</button>
+                                </form>
+                            </div>
+
+                            @if (item.IsDefault)
+                            {
+                                <button type="button" class="btn-default" disabled>Thiết lập mặc định</button>
+                            }
+                            else
+                            {
+                                <form asp-action="SetDefault"
+                                      asp-route-id="@item.Id"
+                                      method="post"
+                                      class="inline-form">
+                                    <button type="submit" class="btn-default">Thiết lập mặc định</button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-address">
+            <p>Bạn chưa có địa chỉ nào.</p>
+        </div>
+    }
+</div>
