@@ -83,13 +83,6 @@ namespace Demo_web_MVC.Service
 
             mlContext.Model.Save(model, split.TrainSet.Schema, modelPath);
 
-            //return
-            //    $"Train xong.\n" +
-            //    $"Model: {modelPath}\n" +
-            //    $"Accuracy: {metrics.Accuracy:P2}\n" +
-            //    $"AUC: {metrics.AreaUnderRocCurve:P2}\n" +
-            //    $"F1 Score: {metrics.F1Score:P2}";
-
             var counts = metrics.ConfusionMatrix.Counts;
 
             var tn = counts[0][0]; // Thực tế bình thường, dự đoán bình thường

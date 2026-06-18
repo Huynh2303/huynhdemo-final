@@ -15,10 +15,7 @@ namespace Demo_web_MVC.Controllers
         {
             _adminDashboardService = adminDashboardService;
         }
-        //private bool IsAjaxRequest()
-        //{
-        //    return Request.Headers["X-Requested-With"] == "XMLHttpRequest";
-        //}
+        // xin chào
         public IActionResult Index()
         {
             
