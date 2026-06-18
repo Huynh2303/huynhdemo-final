@@ -108,6 +108,7 @@ namespace Demo_web_MVC.Repository.Oder
                     };
 
                     _context.OrderItems.Add(orderItem);
+                    item.Variant.Stock -= item.Quantity;
                 }
 
                 var orderLog = new OrderLog
