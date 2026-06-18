@@ -1,0 +1,254 @@
+﻿@using Demo_web_MVC.Models.ViewModel.Oder
+@model Demo_web_MVC.Models.ViewModel.Admin.OrderDetailManagementViewModel
+
+@{
+    ViewData["Title"] = "Chi tiết đơn giao hàng";
+
+    var order = Model.Order;
+    var address = Model.Address;
+    var items = Model.OrderDetails ?? order.Items ?? new List<OderItemViewModel>();
+}
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Thông báo -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="mb-5 rounded-xl border border-green-200 bg-green-50 px-5 py-4 text-green-700 font-medium">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="mb-5 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-red-700 font-medium">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <!-- Header -->
+    <section class="bg-white border border-gray-100 rounded-2xl shadow-sm p-6 mb-6">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+                <div class="flex items-center gap-3 mb-2">
+                    <a asp-controller="Shipping"
+                       asp-action="Index"
+                       class="text-sm text-gray-500 hover:text-gray-900">
+                        ← Quay lại
+                    </a>
+
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-700">
+                        @order.Status
+                    </span>
+                </div>
+
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-900">
+                    Chi tiết đơn hàng #@order.Id
+                </h1>
+
+                <p class="text-gray-500 mt-2">
+                    Kiểm tra thông tin giao hàng trước khi xác nhận hoàn thành đơn.
+                </p>
+            </div>
+
+            <form asp-controller="Shipping"
+                  asp-action="Complete"
+                  method="post"
+                  onsubmit="return confirm('Xác nhận đơn hàng này đã giao và thu tiền thành công?');">
+                @Html.AntiForgeryToken()
+
+                <input type="hidden" name="orderId" value="@order.Id" />
+
+                <button type="submit"
+                        class="w-full md:w-auto px-6 py-3 rounded-xl bg-green-600 text-white hover:bg-green-700 font-bold shadow-sm">
+                    Hoàn thành đơn
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Cột trái -->
+        <section class="lg:col-span-2 space-y-6">
+
+            <!-- Thông tin đơn -->
+            <div class="bg-white border border-gray-100 rounded-2xl shadow-sm p-6">
+                <h2 class="text-xl font-bold text-gray-900 mb-5">
+                    Thông tin đơn hàng
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="rounded-xl bg-gray-50 p-4">
+                        <p class="text-sm text-gray-500 mb-1">Mã đơn</p>
+                        <p class="font-bold text-gray-900">#@order.Id</p>
+                    </div>
+
+                    <div class="rounded-xl bg-gray-50 p-4">
+                        <p class="text-sm text-gray-500 mb-1">Ngày đặt</p>
+                        <p class="font-bold text-gray-900">
+                            @(order.CreateAt.HasValue
+                                ? order.CreateAt.Value.ToString("dd/MM/yyyy HH:mm")
+                                : "Không có ngày")
+                        </p>
+                    </div>
+
+                    <div class="rounded-xl bg-gray-50 p-4">
+                        <p class="text-sm text-gray-500 mb-1">Phương thức thanh toán</p>
+                        <p class="font-bold text-gray-900">@order.PaymentMethod</p>
+                    </div>
+
+                    <div class="rounded-xl bg-gray-50 p-4">
+                        <p class="text-sm text-gray-500 mb-1">Tổng tiền cần xử lý</p>
+                        <p class="font-bold text-red-600 text-lg">
+                            @order.TotalAmount.ToString("N0") đ
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sản phẩm -->
+            <div class="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
+                <div class="p-6 border-b border-gray-100">
+                    <h2 class="text-xl font-bold text-gray-900">
+                        Sản phẩm trong đơn
+                    </h2>
+                </div>
+
+                @if (items == null || !items.Any())
+                {
+                    <div class="p-6 text-gray-500">
+                        Không có sản phẩm trong đơn hàng.
+                    </div>
+                }
+                else
+                {
+                    <div class="divide-y divide-gray-100">
+                        @foreach (var item in items)
+                        {
+                            <div class="p-5 flex gap-4">
+                                <img src="@item.Img"
+                                     alt="@item.Name"
+                                     class="w-20 h-20 rounded-xl object-cover border border-gray-100" />
+
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="font-bold text-gray-900 mb-1">
+                                        @item.Name
+                                    </h3>
+
+                                    <p class="text-sm text-gray-500">
+                                        Số lượng: <span class="font-semibold">@item.Quantity</span>
+                                    </p>
+
+                                    @if (item.Variant != null)
+                                    {
+                                        <p class="text-sm text-gray-500">
+                                            Size: <span class="font-semibold">@(item.Variant.Size ?? "Không có")</span>
+                                            -
+                                            Màu: <span class="font-semibold">@(item.Variant.Color ?? "Không có")</span>
+                                        </p>
+                                    }
+
+                                    <p class="text-sm text-gray-500">
+                                        Đơn giá:
+                                        <span class="font-semibold text-gray-900">
+                                            @item.Price.ToString("N0") đ
+                                        </span>
+                                    </p>
+                                </div>
+
+                                <div class="text-right">
+                                    <p class="text-sm text-gray-500 mb-1">Thành tiền</p>
+                                    <p class="font-bold text-red-600">
+                                        @((item.Price * item.Quantity).ToString("N0")) đ
+                                    </p>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </section>
+
+        <!-- Cột phải -->
+        <aside class="space-y-6">
+
+            <!-- Người nhận -->
+            <div class="bg-white border border-gray-100 rounded-2xl shadow-sm p-6">
+                <h2 class="text-xl font-bold text-gray-900 mb-5">
+                    Người nhận
+                </h2>
+
+                <div class="space-y-4">
+                    <div>
+                        <p class="text-sm text-gray-500 mb-1">Tên khách hàng</p>
+                        <p class="font-bold text-gray-900">
+                            @(Model.User?.FullName ?? Model.User?.Username ?? order.user ?? "Không rõ")
+                        </p>
+                    </div>
+
+                    <div>
+                        <p class="text-sm text-gray-500 mb-1">Số điện thoại</p>
+                        <p class="font-bold text-gray-900">
+                            @(address?.PhoneNumber ?? "Chưa có")
+                        </p>
+                    </div>
+
+                    <div>
+                        <p class="text-sm text-gray-500 mb-1">Người nhận</p>
+                        <p class="font-bold text-gray-900">
+                            @(address?.RecipientName ?? Model.User?.FullName ?? "Chưa có")
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Địa chỉ giao hàng -->
+            <div class="bg-white border border-gray-100 rounded-2xl shadow-sm p-6">
+                <h2 class="text-xl font-bold text-gray-900 mb-5">
+                    Địa chỉ giao hàng
+                </h2>
+
+                @if (address == null)
+                {
+                    <div class="rounded-xl bg-red-50 border border-red-100 p-4 text-red-700">
+                        Chưa có địa chỉ giao hàng.
+                    </div>
+                }
+                else
+                {
+                    <div class="rounded-xl bg-gray-50 p-4">
+                        <p class="font-semibold text-gray-900 leading-7">
+                            @address.AddressLine
+                        </p>
+
+                        <p class="text-gray-600 mt-2">
+                            @address.City, @address.Country
+                        </p>
+
+                        @if (address.IsDefault)
+                        {
+                            <span class="inline-flex mt-3 px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold">
+                                Địa chỉ mặc định
+                            </span>
+                        }
+                    </div>
+                }
+            </div>
+
+            <!-- Ghi chú cho shipper -->
+            <div class="bg-orange-50 border border-orange-100 rounded-2xl p-6">
+                <h2 class="text-lg font-bold text-orange-700 mb-3">
+                    Lưu ý giao hàng
+                </h2>
+
+                <ul class="space-y-2 text-sm text-gray-700">
+                    <li>• Kiểm tra đúng mã đơn trước khi giao.</li>
+                    <li>• Nếu đơn COD, thu đúng tổng tiền hiển thị.</li>
+                    <li>• Chỉ bấm hoàn thành sau khi giao hàng thành công.</li>
+                </ul>
+            </div>
+        </aside>
+    </div>
+    
+</main>

@@ -719,6 +719,16 @@ namespace Demo_web_MVC.Repository.Oder
             };
         }
 
-
+        public async Task<List<Order>> GetShippingOrdersAsync()
+        {
+            return await _context.Orders
+                .Include(o => o.User)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Variant)
+                        .ThenInclude(v => v.Product)
+                .Where(o => o.Status == OrderStatus.Shipping)
+                .OrderByDescending(o => o.CreatedAt)
+                .ToListAsync();
+        }
     }
 }

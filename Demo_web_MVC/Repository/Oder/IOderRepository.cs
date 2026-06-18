@@ -24,5 +24,7 @@ namespace Demo_web_MVC.Repository.Oder
         Task<bool> DeleteOrderAsync(int orderId, int sellerId); // Xóa đơn hàng
         Task<bool> CreateAsync(int orderId, int sellerId);
 
+        // shipping 
+        Task<List<Order>> GetShippingOrdersAsync();
     }
 }

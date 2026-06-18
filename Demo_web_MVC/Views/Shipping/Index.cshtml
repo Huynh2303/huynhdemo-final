@@ -1,0 +1,292 @@
+﻿@model List<Demo_web_MVC.Models.Order>
+
+@{
+    ViewData["Title"] = "Quản lý giao hàng";
+}
+
+<main class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Thông báo -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="mb-5 rounded-xl border border-green-200 bg-green-50 px-5 py-4 text-green-700 font-medium">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="mb-5 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-red-700 font-medium">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <!-- Header -->
+    <section class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 mb-6">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-900">
+                    Quản lý giao hàng
+                </h1>
+
+                <p class="text-gray-500 mt-2">
+                    Danh sách các đơn hàng đang giao và chờ xác nhận hoàn thành.
+                </p>
+            </div>
+
+            <div class="bg-orange-50 border border-orange-100 rounded-xl px-8 py-4 min-w-[180px]">
+                <p class="text-sm text-gray-500">Đơn đang giao</p>
+                <p class="text-3xl font-bold text-orange-600">
+                    @(Model?.Count ?? 0)
+                </p>
+            </div>
+        </div>
+    </section>
+
+    @if (Model == null || !Model.Any())
+    {
+        <section class="bg-white border border-gray-200 rounded-2xl shadow-sm p-10 text-center">
+            <div class="w-16 h-16 mx-auto rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                <span class="text-3xl">🚚</span>
+            </div>
+
+            <h2 class="text-xl font-semibold text-gray-900 mb-2">
+                Chưa có đơn hàng đang giao
+            </h2>
+
+            <p class="text-gray-500">
+                Khi có đơn ở trạng thái đang giao, đơn hàng sẽ hiển thị tại đây.
+            </p>
+        </section>
+    }
+    else
+    {
+        <!-- Bảng desktop có cuộn ngang -->
+        <section class="hidden lg:block bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+
+            <div class="w-full overflow-x-auto">
+                <table class="min-w-[1450px] w-full text-left border-collapse">
+
+                    <thead class="bg-gray-50 border-b border-gray-100">
+                        <tr class="text-sm text-gray-600">
+                            <th class="px-8 py-5 font-semibold whitespace-nowrap w-[150px]">
+                                Mã đơn
+                            </th>
+
+                            <th class="px-8 py-5 font-semibold whitespace-nowrap w-[240px]">
+                                Khách hàng
+                            </th>
+
+                            <th class="px-8 py-5 font-semibold whitespace-nowrap w-[360px]">
+                                Sản phẩm
+                            </th>
+
+                            <th class="px-8 py-5 font-semibold whitespace-nowrap w-[150px]">
+                                Thanh toán
+                            </th>
+
+                            <th class="px-8 py-5 font-semibold whitespace-nowrap w-[200px]">
+                                Tổng tiền
+                            </th>
+
+                            <th class="px-8 py-5 font-semibold whitespace-nowrap w-[180px]">
+                                Ngày tạo
+                            </th>
+
+                            <th class="px-8 py-5 font-semibold whitespace-nowrap text-right w-[260px]">
+                                Thao tác
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <tbody class="divide-y divide-gray-100">
+                        @foreach (var order in Model)
+                        {
+                            <tr class="hover:bg-gray-50 transition">
+
+                                <!-- Mã đơn -->
+                                <td class="px-8 py-6 whitespace-nowrap align-middle">
+                                    <p class="font-bold text-gray-900">
+                                        #@order.Id
+                                    </p>
+
+                                    <span class="inline-flex mt-2 px-3 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-700">
+                                        @order.Status
+                                    </span>
+                                </td>
+
+                                <!-- Khách hàng -->
+                                <td class="px-8 py-6 whitespace-nowrap align-middle">
+                                    <p class="font-bold text-gray-900">
+                                        @(order.User?.FullName ?? order.User?.Username ?? "Không rõ")
+                                    </p>
+
+                                    <p class="text-sm text-gray-500 mt-1">
+                                        ID khách: @order.UserId
+                                    </p>
+                                </td>
+
+                                <!-- Sản phẩm -->
+                                <td class="px-8 py-6 whitespace-nowrap align-middle">
+                                    @if (order.OrderItems != null && order.OrderItems.Any())
+                                    {
+                                        <div class="space-y-1">
+                                            @foreach (var item in order.OrderItems.Take(3))
+                                            {
+                                                <p class="text-sm text-gray-700 whitespace-nowrap">
+                                                    @(item.Variant?.Product?.Name ?? "Sản phẩm")
+                                                    <span class="text-gray-400">x @item.Quantity</span>
+                                                </p>
+                                            }
+
+                                            @if (order.OrderItems.Count > 3)
+                                            {
+                                                <p class="text-xs text-gray-400 whitespace-nowrap">
+                                                    + @(order.OrderItems.Count - 3) sản phẩm khác
+                                                </p>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-sm text-gray-400 whitespace-nowrap">
+                                            Không có sản phẩm
+                                        </span>
+                                    }
+                                </td>
+
+                                <!-- Thanh toán -->
+                                <td class="px-8 py-6 whitespace-nowrap align-middle">
+                                    <span class="font-semibold text-gray-800">
+                                        @order.PaymentMethod
+                                    </span>
+                                </td>
+
+                                <!-- Tổng tiền -->
+                                <td class="px-8 py-6 whitespace-nowrap align-middle">
+                                    <p class="font-bold text-red-600">
+                                        @order.TotalAmount.ToString("N0") đ
+                                    </p>
+                                </td>
+
+                                <!-- Ngày tạo -->
+                                <td class="px-8 py-6 whitespace-nowrap align-middle">
+                                    <p class="text-sm text-gray-800">
+                                        @order.CreatedAt.ToString("dd/MM/yyyy")
+                                    </p>
+
+                                    <p class="text-xs text-gray-400 mt-1">
+                                        @order.CreatedAt.ToString("HH:mm")
+                                    </p>
+                                </td>
+
+                                <!-- Thao tác -->
+                                <td class="px-8 py-6 whitespace-nowrap align-middle">
+                                    <div class="flex justify-end items-center gap-3 flex-nowrap">
+
+                                        <a asp-controller="Shipping"
+                                           asp-action="Detail"
+                                           asp-route-orderId="@order.Id"
+                                           class="inline-flex items-center justify-center min-w-[95px] px-4 py-3 rounded-xl border border-gray-200 text-gray-800 hover:bg-gray-100 text-sm font-bold whitespace-nowrap">
+                                            Chi tiết
+                                        </a>
+
+                                        <form asp-controller="Shipping"
+                                              asp-action="Complete"
+                                              method="post"
+                                              class="inline-block"
+                                              onsubmit="return confirm('Xác nhận đơn hàng này đã giao thành công?');">
+                                            @Html.AntiForgeryToken()
+
+                                            <input type="hidden" name="orderId" value="@order.Id" />
+
+                                            <button type="submit"
+                                                    class="inline-flex items-center justify-center min-w-[115px] px-4 py-3 rounded-xl bg-green-600 text-white hover:bg-green-700 text-sm font-bold whitespace-nowrap">
+                                                Hoàn thành
+                                            </button>
+                                        </form>
+
+                                    </div>
+                                </td>
+
+                            </tr>
+                        }
+                    </tbody>
+
+                </table>
+            </div>
+        </section>
+
+        <!-- Mobile card -->
+        <section class="lg:hidden space-y-4">
+            @foreach (var order in Model)
+            {
+                <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-5">
+
+                    <div class="flex items-start justify-between gap-3 mb-4">
+                        <div>
+                            <h2 class="text-lg font-bold text-gray-900">
+                                Đơn hàng #@order.Id
+                            </h2>
+
+                            <p class="text-sm text-gray-500">
+                                @order.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                            </p>
+                        </div>
+
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-700 whitespace-nowrap">
+                            @order.Status
+                        </span>
+                    </div>
+
+                    <div class="space-y-2 text-sm mb-4">
+                        <p>
+                            <span class="text-gray-500">Khách hàng:</span>
+                            <span class="font-semibold text-gray-900">
+                                @(order.User?.FullName ?? order.User?.Username ?? "Không rõ")
+                            </span>
+                        </p>
+
+                        <p>
+                            <span class="text-gray-500">Thanh toán:</span>
+                            <span class="font-semibold text-gray-900">
+                                @order.PaymentMethod
+                            </span>
+                        </p>
+
+                        <p>
+                            <span class="text-gray-500">Tổng tiền:</span>
+                            <span class="font-bold text-red-600">
+                                @order.TotalAmount.ToString("N0") đ
+                            </span>
+                        </p>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <a asp-controller="Shipping"
+                           asp-action="Detail"
+                           asp-route-orderId="@order.Id"
+                           class="flex-1 text-center px-4 py-3 rounded-xl border border-gray-200 text-gray-800 font-bold">
+                            Chi tiết
+                        </a>
+
+                        <form asp-controller="Shipping"
+                              asp-action="Complete"
+                              method="post"
+                              class="flex-1"
+                              onsubmit="return confirm('Xác nhận đơn hàng này đã giao thành công?');">
+                            @Html.AntiForgeryToken()
+
+                            <input type="hidden" name="orderId" value="@order.Id" />
+
+                            <button type="submit"
+                                    class="w-full px-4 py-3 rounded-xl bg-green-600 text-white font-bold">
+                                Hoàn thành
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            }
+        </section>
+    }
+</main>

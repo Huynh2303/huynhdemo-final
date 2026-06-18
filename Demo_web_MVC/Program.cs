@@ -29,6 +29,7 @@ using Demo_web_MVC.Service.Payment;
 using Demo_web_MVC.Service.Product;
 using Demo_web_MVC.Service.Search;
 using Demo_web_MVC.Service.Sendemail;
+using Demo_web_MVC.Service.Shipping;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
@@ -37,6 +38,7 @@ using Microsoft.Extensions.FileProviders;
 using NETCore.MailKit.Core;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddScoped<IShippingService,ShippingService>();
 builder.Services.AddScoped<INotificationsService, NotificationsService>();
 builder.Services.AddScoped<INotificationsRepository, NotificationsRepository>();
 builder.Services.AddScoped<IChatService, ChatService>();
@@ -66,7 +68,9 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped< IProductService,ProductService>();
 builder.Services.AddScoped<IEmailServices, Sendemail>();
-builder.Services.AddControllersWithViews();
+
+builder.Services.AddControllersWithViews()
+                .AddRazorRuntimeCompilation();
 builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddSignalR();

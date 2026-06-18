@@ -26,4 +26,18 @@ public partial class Order
 
     public virtual User User { get; set; } = null!;
     public OrderStatus Status { get; set; }
+    public bool CanCompleteDelivery()
+    {
+        return Status == OrderStatus.Shipping;
+    }
+
+    public void CompleteDelivery()
+    {
+        if (!CanCompleteDelivery())
+        {
+            throw new InvalidOperationException("Chỉ đơn đang giao mới được hoàn thành.");
+        }
+
+        Status = OrderStatus.Completed;
+    }
 }
