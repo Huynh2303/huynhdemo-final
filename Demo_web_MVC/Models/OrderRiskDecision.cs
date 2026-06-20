@@ -8,5 +8,6 @@
 
         public List<string> Reasons { get; set; } = new();
         public float FinalScore { get; set; }
+        public string WarningMessage { get; set; } = string.Empty;
     }
 }
