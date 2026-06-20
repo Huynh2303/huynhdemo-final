@@ -357,171 +357,438 @@ namespace Demo_web_MVC.Controllers
             var testCases = new List<(string Name, OrderRiskTrainingData Input, string ExpectedLevel)>
 {
     // =========================
-    // SIÊU KHÓ - khách rất tốt nhưng có dấu hiệu bất thường mạnh
+    // User 26 - test7, lịch sử tốt nhưng AccountAgeDays đang = 0
+    // Nếu user 26 đã là VIP thật thì đổi IsVip = 1
     // =========================
+
     (
-        "TC01 - VIP rất tốt nhưng đơn tăng đột biến cực mạnh",
+        "DB76 - User 26, đặt nhiều đơn trong ngày, đơn 8.99 triệu",
         new OrderRiskTrainingData
         {
-            AccountAgeDays = 420,
-            TotalOrders = 25,
-            OrdersLast24h = 1,
-            OrdersLast7d = 2,
-            CancelledOrders = 1,
-            CancelRate = 0.04f,
-            CurrentOrderValue = 6500000,
-            AvgOrderValue = 800000,
+            AccountAgeDays = 0,
+            TotalOrders = 12,
+            OrdersLast24h = 4,
+            OrdersLast7d = 5,
+            CancelledOrders = 0,
+            CancelRate = 0f,
+
+            CurrentOrderValue = 8990000,
+            AvgOrderValue = 925000,
+
             IsCod = 1,
             CodOrderCount = 12,
-            PhoneUsedCount = 1,
-            AddressUsedCount = 1,
-            ItemCount = 5,
-            TotalQuantity = 10,
-            StatusChangeCount = 2,
+
+            ItemCount = 1,
+            TotalQuantity = 1,
+
+            IsVip = 0,
+            CompletedOrderCount = 8,
+            CompletionRate = 0.667f,
+
+            PhoneUsedCount = 0,
+            AddressUsedCount = 0,
+            StatusChangeCount = 0,
             CancelledOrdersLast24h = 0,
             CancelRateLast24h = 0f,
             CancelledOrdersLast7d = 0,
-            CancelRateLast7d = 0f,
-            IsVip = 1,
-            CompletedOrderCount = 24,
-            CompletionRate = 0.96f
+            CancelRateLast7d = 0f
+        },
+        "Medium"
+    ),
+
+    (
+        "DB75 - User 26, tài khoản mới nhưng có lịch sử hoàn thành, đơn 12 triệu",
+        new OrderRiskTrainingData
+        {
+            AccountAgeDays = 0,
+            TotalOrders = 11,
+            OrdersLast24h = 3,
+            OrdersLast7d = 4,
+            CancelledOrders = 0,
+            CancelRate = 0f,
+
+            CurrentOrderValue = 12000000,
+            AvgOrderValue = 925000,
+
+            IsCod = 1,
+            CodOrderCount = 11,
+
+            ItemCount = 1,
+            TotalQuantity = 1,
+
+            IsVip = 0,
+            CompletedOrderCount = 8,
+            CompletionRate = 0.727f,
+
+            PhoneUsedCount = 0,
+            AddressUsedCount = 0,
+            StatusChangeCount = 0,
+            CancelledOrdersLast24h = 0,
+            CancelRateLast24h = 0f,
+            CancelledOrdersLast7d = 0,
+            CancelRateLast7d = 0f
+        },
+        "Medium"
+    ),
+
+    (
+        "DB74 - User 1, đặt nhiều đơn gần đây, có lịch sử hủy, đơn 9.5 triệu",
+        new OrderRiskTrainingData
+        {
+            AccountAgeDays = 48,
+            TotalOrders = 26,
+            OrdersLast24h = 3,
+            OrdersLast7d = 7,
+            CancelledOrders = 6,
+            CancelRate = 0.231f,
+
+            CurrentOrderValue = 9500000,
+            AvgOrderValue = 0,
+
+            IsCod = 1,
+            CodOrderCount = 26,
+
+            ItemCount = 2,
+            TotalQuantity = 2,
+
+            IsVip = 0,
+            CompletedOrderCount = 0,
+            CompletionRate = 0f,
+
+            PhoneUsedCount = 0,
+            AddressUsedCount = 0,
+            StatusChangeCount = 0,
+            CancelledOrdersLast24h = 0,
+            CancelRateLast24h = 0f,
+            CancelledOrdersLast7d = 0,
+            CancelRateLast7d = 0f
+        },
+        "Medium"
+    ),
+
+    (
+        "DB73 - User 26, lịch sử hoàn thành tốt, đơn 12 triệu",
+        new OrderRiskTrainingData
+        {
+            AccountAgeDays = 0,
+            TotalOrders = 10,
+            OrdersLast24h = 2,
+            OrdersLast7d = 3,
+            CancelledOrders = 0,
+            CancelRate = 0f,
+
+            CurrentOrderValue = 12000000,
+            AvgOrderValue = 925000,
+
+            IsCod = 1,
+            CodOrderCount = 10,
+
+            ItemCount = 1,
+            TotalQuantity = 1,
+
+            IsVip = 0,
+            CompletedOrderCount = 8,
+            CompletionRate = 0.800f,
+
+            PhoneUsedCount = 0,
+            AddressUsedCount = 0,
+            StatusChangeCount = 0,
+            CancelledOrdersLast24h = 0,
+            CancelRateLast24h = 0f,
+            CancelledOrdersLast7d = 0,
+            CancelRateLast7d = 0f
+        },
+        "Medium"
+    ),
+
+    (
+        "DB72 - User 27, tài khoản mới, đơn đầu tiên nhỏ 500k",
+        new OrderRiskTrainingData
+        {
+            AccountAgeDays = 0,
+            TotalOrders = 0,
+            OrdersLast24h = 0,
+            OrdersLast7d = 0,
+            CancelledOrders = 0,
+            CancelRate = 0f,
+
+            CurrentOrderValue = 500000,
+            AvgOrderValue = 0,
+
+            IsCod = 1,
+            CodOrderCount = 0,
+
+            ItemCount = 1,
+            TotalQuantity = 1,
+
+            IsVip = 0,
+            CompletedOrderCount = 0,
+            CompletionRate = 0f,
+
+            PhoneUsedCount = 0,
+            AddressUsedCount = 0,
+            StatusChangeCount = 0,
+            CancelledOrdersLast24h = 0,
+            CancelRateLast24h = 0f,
+            CancelledOrdersLast7d = 0,
+            CancelRateLast7d = 0f
+        },
+        "Low"
+    ),
+
+    (
+        "DB71 - User 26, lịch sử tốt, đơn 13.5 triệu",
+        new OrderRiskTrainingData
+        {
+            AccountAgeDays = 0,
+            TotalOrders = 9,
+            OrdersLast24h = 1,
+            OrdersLast7d = 2,
+            CancelledOrders = 0,
+            CancelRate = 0f,
+
+            CurrentOrderValue = 13500000,
+            AvgOrderValue = 925000,
+
+            IsCod = 1,
+            CodOrderCount = 9,
+
+            ItemCount = 1,
+            TotalQuantity = 1,
+
+            IsVip = 0,
+            CompletedOrderCount = 8,
+            CompletionRate = 0.889f,
+
+            PhoneUsedCount = 0,
+            AddressUsedCount = 0,
+            StatusChangeCount = 0,
+            CancelledOrdersLast24h = 0,
+            CancelRateLast24h = 0f,
+            CancelledOrdersLast7d = 0,
+            CancelRateLast7d = 0f
+        },
+        "Medium"
+    ),
+
+    (
+        "DB62 - User 26, đơn 1.9 triệu, lịch sử hoàn thành tốt",
+        new OrderRiskTrainingData
+        {
+            AccountAgeDays = 0,
+            TotalOrders = 8,
+            OrdersLast24h = 0,
+            OrdersLast7d = 1,
+            CancelledOrders = 0,
+            CancelRate = 0f,
+
+            CurrentOrderValue = 1900000,
+            AvgOrderValue = 925000,
+
+            IsCod = 1,
+            CodOrderCount = 8,
+
+            ItemCount = 1,
+            TotalQuantity = 1,
+
+            IsVip = 0,
+            CompletedOrderCount = 8,
+            CompletionRate = 1f,
+
+            PhoneUsedCount = 0,
+            AddressUsedCount = 0,
+            StatusChangeCount = 0,
+            CancelledOrdersLast24h = 0,
+            CancelRateLast24h = 0f,
+            CancelledOrdersLast7d = 0,
+            CancelRateLast7d = 0f
+        },
+        "Low"
+    ),
+
+    // =========================
+    // User 10 - lịch sử hủy / hoàn thành yếu
+    // =========================
+
+    (
+        "DB61 - User 10, lịch sử yếu, đơn 9 triệu",
+        new OrderRiskTrainingData
+        {
+            AccountAgeDays = 38,
+            TotalOrders = 11,
+            OrdersLast24h = 1,
+            OrdersLast7d = 3,
+            CancelledOrders = 3,
+            CancelRate = 0.273f,
+
+            CurrentOrderValue = 9000000,
+            AvgOrderValue = 14950000,
+
+            IsCod = 1,
+            CodOrderCount = 11,
+
+            ItemCount = 1,
+            TotalQuantity = 1,
+
+            IsVip = 0,
+            CompletedOrderCount = 3,
+            CompletionRate = 0.273f,
+
+            PhoneUsedCount = 0,
+            AddressUsedCount = 0,
+            StatusChangeCount = 0,
+            CancelledOrdersLast24h = 0,
+            CancelRateLast24h = 0f,
+            CancelledOrdersLast7d = 0,
+            CancelRateLast7d = 0f
+        },
+        "Medium"
+    ),
+
+    (
+        "DB60 - User 10, tỷ lệ hoàn thành thấp, đơn 13.5 triệu",
+        new OrderRiskTrainingData
+        {
+            AccountAgeDays = 38,
+            TotalOrders = 10,
+            OrdersLast24h = 0,
+            OrdersLast7d = 2,
+            CancelledOrders = 3,
+            CancelRate = 0.300f,
+
+            CurrentOrderValue = 13500000,
+            AvgOrderValue = 15675000,
+
+            IsCod = 1,
+            CodOrderCount = 10,
+
+            ItemCount = 1,
+            TotalQuantity = 1,
+
+            IsVip = 0,
+            CompletedOrderCount = 2,
+            CompletionRate = 0.200f,
+
+            PhoneUsedCount = 0,
+            AddressUsedCount = 0,
+            StatusChangeCount = 0,
+            CancelledOrdersLast24h = 0,
+            CancelRateLast24h = 0f,
+            CancelledOrdersLast7d = 0,
+            CancelRateLast7d = 0f
+        },
+        "Medium"
+    ),
+
+    // =========================
+    // User 1 - nhiều đơn, có hủy, completionRate đang rất yếu
+    // =========================
+
+    (
+        "DB59 - User 1, đơn rất lớn 42.5 triệu, lịch sử yếu",
+        new OrderRiskTrainingData
+        {
+            AccountAgeDays = 48,
+            TotalOrders = 25,
+            OrdersLast24h = 2,
+            OrdersLast7d = 6,
+            CancelledOrders = 6,
+            CancelRate = 0.240f,
+
+            CurrentOrderValue = 42500000,
+            AvgOrderValue = 0,
+
+            IsCod = 1,
+            CodOrderCount = 25,
+
+            ItemCount = 2,
+            TotalQuantity = 2,
+
+            IsVip = 0,
+            CompletedOrderCount = 0,
+            CompletionRate = 0f,
+
+            PhoneUsedCount = 0,
+            AddressUsedCount = 0,
+            StatusChangeCount = 0,
+            CancelledOrdersLast24h = 0,
+            CancelRateLast24h = 0f,
+            CancelledOrdersLast7d = 0,
+            CancelRateLast7d = 0f
         },
         "High"
     ),
 
-    // =========================
-    // SIÊU KHÓ - tài khoản mới, đơn cao nhưng chưa đủ để High
-    // =========================
     (
-        "TC02 - Tài khoản mới, đơn cao nhưng số lượng ít và đã hoàn thành 1 đơn",
+        "DB58 - User 1, đơn 3.65 triệu, lịch sử có hủy",
         new OrderRiskTrainingData
         {
-            AccountAgeDays = 5,
-            TotalOrders = 1,
+            AccountAgeDays = 48,
+            TotalOrders = 24,
             OrdersLast24h = 1,
-            OrdersLast7d = 1,
-            CancelledOrders = 0,
-            CancelRate = 0f,
-            CurrentOrderValue = 4200000,
-            AvgOrderValue = 900000,
+            OrdersLast7d = 5,
+            CancelledOrders = 6,
+            CancelRate = 0.250f,
+
+            CurrentOrderValue = 3650000,
+            AvgOrderValue = 0,
+
             IsCod = 1,
-            CodOrderCount = 1,
-            PhoneUsedCount = 1,
-            AddressUsedCount = 1,
+            CodOrderCount = 24,
+
             ItemCount = 1,
             TotalQuantity = 1,
-            StatusChangeCount = 1,
+
+            IsVip = 0,
+            CompletedOrderCount = 0,
+            CompletionRate = 0f,
+
+            PhoneUsedCount = 0,
+            AddressUsedCount = 0,
+            StatusChangeCount = 0,
             CancelledOrdersLast24h = 0,
             CancelRateLast24h = 0f,
             CancelledOrdersLast7d = 0,
-            CancelRateLast7d = 0f,
-            IsVip = 0,
-            CompletedOrderCount = 1,
-            CompletionRate = 1f
+            CancelRateLast7d = 0f
         },
         "Medium"
     ),
 
-    // =========================
-    // SIÊU KHÓ - cancelRate đáng chú ý nhưng đơn hiện tại nhỏ
-    // =========================
     (
-        "TC03 - Khách cũ, cancelRate trung bình cao nhưng đơn hiện tại rất nhỏ",
+        "DB57 - User 1, đơn 18 triệu, lịch sử có hủy và hoàn thành yếu",
         new OrderRiskTrainingData
         {
-            AccountAgeDays = 180,
-            TotalOrders = 12,
-            OrdersLast24h = 1,
-            OrdersLast7d = 2,
-            CancelledOrders = 4,
-            CancelRate = 0.333f,
-            CurrentOrderValue = 450000,
-            AvgOrderValue = 900000,
-            IsCod = 1,
-            CodOrderCount = 10,
-            PhoneUsedCount = 1,
-            AddressUsedCount = 1,
-            ItemCount = 2,
-            TotalQuantity = 2,
-            StatusChangeCount = 3,
-            CancelledOrdersLast24h = 0,
-            CancelRateLast24h = 0f,
-            CancelledOrdersLast7d = 1,
-            CancelRateLast7d = 0.5f,
-            IsVip = 0,
-            CompletedOrderCount = 8,
-            CompletionRate = 0.667f
-        },
-        "Medium"
-    ),
-
-    // =========================
-    // SIÊU KHÓ - tài khoản mới đặt dồn dập nhưng giá trị thấp
-    // =========================
-    (
-        "TC04 - Tài khoản mới, đặt nhiều đơn trong ngày nhưng đơn hiện tại nhỏ",
-        new OrderRiskTrainingData
-        {
-            AccountAgeDays = 6,
-            TotalOrders = 3,
-            OrdersLast24h = 4,
+            AccountAgeDays = 48,
+            TotalOrders = 23,
+            OrdersLast24h = 0,
             OrdersLast7d = 4,
-            CancelledOrders = 0,
-            CancelRate = 0f,
-            CurrentOrderValue = 600000,
-            AvgOrderValue = 500000,
-            IsCod = 1,
-            CodOrderCount = 3,
-            PhoneUsedCount = 1,
-            AddressUsedCount = 1,
-            ItemCount = 2,
-            TotalQuantity = 3,
-            StatusChangeCount = 1,
-            CancelledOrdersLast24h = 0,
-            CancelRateLast24h = 0f,
-            CancelledOrdersLast7d = 0,
-            CancelRateLast7d = 0f,
-            IsVip = 0,
-            CompletedOrderCount = 3,
-            CompletionRate = 1f
-        },
-        "Medium"
-    ),
+            CancelledOrders = 6,
+            CancelRate = 0.261f,
 
-    // =========================
-    // SIÊU KHÓ - khách tốt nhưng số lượng/item lớn
-    // =========================
-    (
-        "TC05 - Khách tốt, nhiều item và số lượng lớn nhưng giá trị không cao",
-        new OrderRiskTrainingData
-        {
-            AccountAgeDays = 300,
-            TotalOrders = 18,
-            OrdersLast24h = 1,
-            OrdersLast7d = 2,
-            CancelledOrders = 1,
-            CancelRate = 0.056f,
-            CurrentOrderValue = 1300000,
-            AvgOrderValue = 1100000,
+            CurrentOrderValue = 18001000,
+            AvgOrderValue = 0,
+
             IsCod = 1,
-            CodOrderCount = 12,
-            PhoneUsedCount = 1,
-            AddressUsedCount = 1,
-            ItemCount = 7,
-            TotalQuantity = 18,
-            StatusChangeCount = 2,
+            CodOrderCount = 23,
+
+            ItemCount = 1,
+            TotalQuantity = 1,
+
+            IsVip = 0,
+            CompletedOrderCount = 0,
+            CompletionRate = 0f,
+
+            PhoneUsedCount = 0,
+            AddressUsedCount = 0,
+            StatusChangeCount = 0,
             CancelledOrdersLast24h = 0,
             CancelRateLast24h = 0f,
             CancelledOrdersLast7d = 0,
-            CancelRateLast7d = 0f,
-            IsVip = 1,
-            CompletedOrderCount = 17,
-            CompletionRate = 0.944f
+            CancelRateLast7d = 0f
         },
-        "Medium"
+        "High"
     )
 };
-
             var result = new StringBuilder();
 
             int passCount = 0;

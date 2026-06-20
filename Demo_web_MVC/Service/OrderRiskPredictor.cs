@@ -54,7 +54,9 @@ namespace Demo_web_MVC.Service
             return "Có thể nhận đơn.";
         }
 
-        public OrderRiskDecision GetRiskDecision(OrderRiskTrainingData input, OrderRiskPrediction prediction)
+        public OrderRiskDecision GetRiskDecision(
+            OrderRiskTrainingData input,
+            OrderRiskPrediction prediction)
         {
             if (input.CurrentOrderValue <= 0 ||
                 input.ItemCount <= 0 ||
@@ -67,9 +69,9 @@ namespace Demo_web_MVC.Service
                     Suggestion = GetSuggestion("DataWarning"),
                     FinalScore = 0,
                     Reasons = new List<string>
-            {
-                "Dữ liệu đơn hàng: Đơn thiếu dữ liệu sản phẩm, tổng tiền hoặc số lượng."
-            }
+                    {
+                        "Dữ liệu đơn hàng: Đơn thiếu dữ liệu sản phẩm, tổng tiền hoặc số lượng."
+                    }
                 };
             }
 
@@ -80,15 +82,15 @@ namespace Demo_web_MVC.Service
                 reasonScores.Add((field, impact, message));
             }
 
-            // Không dùng prediction.IsRisk.
             // Chỉ lấy Score của AI làm điểm nền.
+            // Không dùng trực tiếp prediction.IsRisk để quyết định cuối cùng.
             float aiBaseScore = NormalizeAiScore(prediction.Score);
             float finalScore = aiBaseScore;
 
+            var orderValueThresholds = GetOrderValueThresholds(input);
+
             // =========================
             // 1. Điểm bảo vệ khách tốt
-            // Các lý do giảm điểm vẫn dùng để tính toán,
-            // nhưng không đưa vào 4 lý do cảnh báo cho seller.
             // =========================
 
             if (input.AccountAgeDays >= 90)
@@ -128,10 +130,7 @@ namespace Demo_web_MVC.Service
                 finalScore -= 5;
             }
 
-            if (input.IsVip == 1 &&
-                input.TotalOrders >= 5 &&
-                input.CompletionRate >= 0.8f &&
-                input.CancelRate <= 0.15f)
+            if (IsTrustedVipCustomer(input))
             {
                 finalScore -= 10;
             }
@@ -170,27 +169,29 @@ namespace Demo_web_MVC.Service
 
             // =========================
             // 3. Giá trị đơn hàng
+            // Ngưỡng tiền thay đổi theo độ uy tín khách.
+            // VIP tốt có ngưỡng cao hơn khách thường.
             // =========================
 
-            if (input.CurrentOrderValue >= 5000000)
+            if (input.CurrentOrderValue >= orderValueThresholds.VeryHighValue)
             {
-                finalScore += 25;
+                finalScore += 20;
                 AddReason(
                     "Giá trị đơn hàng",
-                    25,
-                    "Đơn hàng có giá trị rất cao so với mức thông thường."
+                    20,
+                    "Đơn hàng có giá trị rất cao, nên kiểm tra kỹ trước khi xử lý."
                 );
             }
-            else if (input.CurrentOrderValue >= 3000000)
+            else if (input.CurrentOrderValue >= orderValueThresholds.HighValue)
             {
-                finalScore += 15;
+                finalScore += 12;
                 AddReason(
                     "Giá trị đơn hàng",
-                    15,
+                    12,
                     "Đơn hàng có giá trị cao."
                 );
             }
-            else if (input.CurrentOrderValue >= 2000000)
+            else if (input.CurrentOrderValue >= orderValueThresholds.MediumValue)
             {
                 finalScore += 8;
                 AddReason(
@@ -200,45 +201,67 @@ namespace Demo_web_MVC.Service
                 );
             }
 
-            if (input.TotalOrders >= 3 &&
-                input.AvgOrderValue > 0 &&
-                input.CurrentOrderValue >= input.AvgOrderValue * 6 &&
-                input.CurrentOrderValue >= 4000000)
+            // =========================
+            // 4. So sánh với lịch sử mua hàng
+            // Không so spike quá mạnh nếu AvgOrderValue quá thấp.
+            // Với VIP tốt, ngưỡng spike cao hơn.
+            // =========================
+
+            var minAvgValueForSpike = IsTrustedVipCustomer(input)
+                ? 5000000
+                : 3000000;
+
+            var spikeLevel1Value = IsTrustedVipCustomer(input)
+                ? 25000000
+                : 15000000;
+
+            var spikeLevel2Value = IsTrustedVipCustomer(input)
+                ? 35000000
+                : 20000000;
+
+            var spikeLevel3Value = IsTrustedVipCustomer(input)
+                ? 50000000
+                : 30000000;
+
+            if (input.TotalOrders >= 5 &&
+                input.AvgOrderValue >= minAvgValueForSpike &&
+                input.CurrentOrderValue >= input.AvgOrderValue * 5 &&
+                input.CurrentOrderValue >= spikeLevel3Value)
             {
-                finalScore += 80;
+                finalScore += 35;
                 AddReason(
                     "So sánh với lịch sử mua hàng",
-                    80,
-                    "Giá trị đơn hiện tại tăng đột biến rất mạnh so với trung bình các đơn trước của khách."
+                    35,
+                    "Giá trị đơn hiện tại cao bất thường so với lịch sử mua hàng trước đó."
                 );
             }
-            else if (input.TotalOrders >= 3 &&
-                     input.AvgOrderValue > 0 &&
+            else if (input.TotalOrders >= 5 &&
+                     input.AvgOrderValue >= minAvgValueForSpike &&
                      input.CurrentOrderValue >= input.AvgOrderValue * 4 &&
-                     input.CurrentOrderValue >= 2500000)
-            {
-                finalScore += 45;
-                AddReason(
-                    "So sánh với lịch sử mua hàng",
-                    45,
-                    "Giá trị đơn hiện tại cao bất thường so với lịch sử mua hàng của khách."
-                );
-            }
-            else if (input.TotalOrders >= 3 &&
-                     input.AvgOrderValue > 0 &&
-                     input.CurrentOrderValue >= input.AvgOrderValue * 3 &&
-                     input.CurrentOrderValue >= 1500000)
+                     input.CurrentOrderValue >= spikeLevel2Value)
             {
                 finalScore += 25;
                 AddReason(
                     "So sánh với lịch sử mua hàng",
                     25,
-                    "Giá trị đơn hiện tại cao hơn nhiều so với trung bình các đơn trước."
+                    "Giá trị đơn hiện tại cao hơn nhiều so với lịch sử mua hàng của khách."
+                );
+            }
+            else if (input.TotalOrders >= 5 &&
+                     input.AvgOrderValue >= minAvgValueForSpike &&
+                     input.CurrentOrderValue >= input.AvgOrderValue * 3 &&
+                     input.CurrentOrderValue >= spikeLevel1Value)
+            {
+                finalScore += 15;
+                AddReason(
+                    "So sánh với lịch sử mua hàng",
+                    15,
+                    "Giá trị đơn hiện tại cao hơn lịch sử mua hàng thông thường của khách."
                 );
             }
 
             // =========================
-            // 4. Số lượng và số loại sản phẩm
+            // 5. Số lượng và số loại sản phẩm
             // =========================
 
             if (input.TotalQuantity >= 20)
@@ -289,7 +312,7 @@ namespace Demo_web_MVC.Service
             }
 
             // =========================
-            // 5. Tần suất đặt đơn
+            // 6. Tần suất đặt đơn
             // =========================
 
             if (input.OrdersLast24h >= 5)
@@ -340,7 +363,7 @@ namespace Demo_web_MVC.Service
             }
 
             // =========================
-            // 6. Hủy đơn tổng thể
+            // 7. Hủy đơn tổng thể
             // =========================
 
             if (input.TotalOrders >= 5 && input.CancelRate >= 0.7f)
@@ -400,7 +423,7 @@ namespace Demo_web_MVC.Service
             }
 
             // =========================
-            // 7. COD count
+            // 8. Lịch sử COD
             // =========================
 
             if (input.CodOrderCount >= 10 && input.CancelRate >= 0.3f)
@@ -423,11 +446,12 @@ namespace Demo_web_MVC.Service
             }
 
             // =========================
-            // 8. Tổ hợp cộng điểm
+            // 9. Tổ hợp cộng điểm
+            // Không kéo High chỉ vì giá trị đơn cao.
             // =========================
 
             if (input.AccountAgeDays <= 7 &&
-                input.CurrentOrderValue >= 3000000 &&
+                input.CurrentOrderValue >= orderValueThresholds.MediumValue &&
                 input.TotalQuantity >= 8)
             {
                 finalScore += 10;
@@ -439,13 +463,13 @@ namespace Demo_web_MVC.Service
             }
 
             if (input.AccountAgeDays <= 7 &&
-                input.CurrentOrderValue >= 5000000)
+                input.CurrentOrderValue >= orderValueThresholds.HighValue)
             {
-                finalScore += 15;
+                finalScore += 10;
                 AddReason(
                     "Tổ hợp dấu hiệu rủi ro",
-                    15,
-                    "Tài khoản mới đi kèm đơn hàng có giá trị rất cao."
+                    10,
+                    "Tài khoản mới đi kèm đơn hàng có giá trị cao."
                 );
             }
 
@@ -461,24 +485,24 @@ namespace Demo_web_MVC.Service
                 );
             }
 
-            if (input.TotalOrders >= 3 &&
-                input.AvgOrderValue > 0 &&
-                input.CurrentOrderValue >= input.AvgOrderValue * 6 &&
-                input.CurrentOrderValue >= 4000000 &&
+            if (input.TotalOrders >= 5 &&
+                input.AvgOrderValue >= minAvgValueForSpike &&
+                input.CurrentOrderValue >= input.AvgOrderValue * 4 &&
+                input.CurrentOrderValue >= spikeLevel2Value &&
                 input.TotalQuantity >= 8 &&
                 input.ItemCount >= 4)
             {
-                finalScore += 20;
+                finalScore += 15;
                 AddReason(
                     "Tổ hợp dấu hiệu rủi ro",
-                    20,
-                    "Đơn hàng vừa tăng đột biến so với lịch sử, vừa có giá trị cao và nhiều sản phẩm."
+                    15,
+                    "Đơn hàng vừa cao hơn lịch sử, vừa có số lượng và số loại sản phẩm đáng chú ý."
                 );
             }
 
             if (input.AccountAgeDays <= 15 &&
                 input.OrdersLast24h >= 3 &&
-                input.CurrentOrderValue >= 1000000)
+                input.CurrentOrderValue >= orderValueThresholds.MediumValue)
             {
                 finalScore += 10;
                 AddReason(
@@ -490,7 +514,7 @@ namespace Demo_web_MVC.Service
 
             if (input.TotalOrders >= 5 &&
                 input.CancelRate >= 0.3f &&
-                input.CurrentOrderValue >= 2000000)
+                input.CurrentOrderValue >= orderValueThresholds.MediumValue)
             {
                 finalScore += 10;
                 AddReason(
@@ -502,7 +526,7 @@ namespace Demo_web_MVC.Service
 
             if (input.TotalOrders >= 5 &&
                 input.CompletionRate < 0.6f &&
-                input.CurrentOrderValue >= 1500000)
+                input.CurrentOrderValue >= orderValueThresholds.MediumValue)
             {
                 finalScore += 10;
                 AddReason(
@@ -513,23 +537,56 @@ namespace Demo_web_MVC.Service
             }
 
             // =========================
-            // 9. Giới hạn điểm cho khách tốt
+            // 10. Giới hạn điểm cho khách tốt
+            // Khách tốt/VIP tốt không bị đẩy High chỉ vì đơn giá trị cao vừa phải.
             // =========================
 
             if (IsGoodCustomer(input) &&
                 !IsStrongOrderValueSpike(input) &&
+                !IsCriticalHighRiskCase(input) &&
+                !IsHighRiskByBadHistory(input) &&
                 finalScore > 60)
             {
                 finalScore = 60;
             }
 
             // =========================
-            // 10. Giới hạn các case chỉ nên ở mức Medium
+            // 11. Chặn các case chỉ nên Medium
             // =========================
 
-            if (IsMediumOnlyCase(input) && finalScore > 70)
+            if (IsMediumOnlyCase(input) &&
+                !IsCriticalHighRiskCase(input) &&
+                !IsHighRiskByBadHistory(input) &&
+                !IsExtremeOrderValueSpike(input) &&
+                finalScore > 70)
             {
                 finalScore = 70;
+            }
+
+            // =========================
+            // 12. Sàn High cho case thật sự nghiêm trọng
+            // =========================
+
+            if (IsCriticalHighRiskCase(input) && finalScore < 85)
+            {
+                finalScore = 85;
+
+                AddReason(
+                    "Tổ hợp rủi ro nghiêm trọng",
+                    85,
+                    "Đơn hàng có nhiều dấu hiệu rủi ro nghiêm trọng xuất hiện cùng lúc."
+                );
+            }
+
+            if (IsHighRiskByBadHistory(input) && finalScore < 85)
+            {
+                finalScore = 85;
+
+                AddReason(
+                    "Lịch sử mua hàng",
+                    85,
+                    "Đơn hàng có giá trị cao đi kèm lịch sử mua hàng yếu nên được xếp vào mức cảnh báo cao."
+                );
             }
 
             if (IsExtremeOrderValueSpike(input) && finalScore < 85)
@@ -544,7 +601,48 @@ namespace Demo_web_MVC.Service
             }
 
             // =========================
-            // 11. Phân mức cuối cùng
+            // 13. Bảo vệ VIP tốt mua đơn dưới 10 triệu
+            // =========================
+
+            if (IsTrustedCustomerLowValueOrder(input) && finalScore < 80)
+            {
+                finalScore = 15;
+
+                reasonScores.RemoveAll(x =>
+                    x.Field == "Giá trị đơn hàng" ||
+                    x.Field == "Tuổi tài khoản" ||
+                    x.Field == "Tổ hợp dấu hiệu rủi ro"
+                );
+            }
+
+            // =========================
+            // 14. Sàn Medium cho đơn giá trị đáng chú ý
+            // =========================
+
+            if (IsSignificantOrderValueCase(input) && finalScore < 35)
+            {
+                finalScore = 35;
+
+                AddReason(
+                    "Giá trị đơn hàng",
+                    35,
+                    "Đơn hàng có giá trị đáng chú ý nên cần được kiểm tra trước khi xử lý."
+                );
+            }
+
+            // =========================
+            // 15. Giảm nhạy cho đơn đầu bình thường
+            // =========================
+
+            if (IsNewCustomerNormalOrder(input) && finalScore < 40)
+            {
+                finalScore = 15;
+
+                reasonScores.RemoveAll(x => x.Field == "Tuổi tài khoản");
+            }
+
+            // =========================
+            // 16. Phân mức cuối cùng
             // =========================
 
             string riskLevel;
@@ -553,13 +651,39 @@ namespace Demo_web_MVC.Service
             {
                 riskLevel = "High";
             }
-            else if (finalScore >= 20)
+            else if (finalScore >= 30)
             {
                 riskLevel = "Medium";
             }
             else
             {
                 riskLevel = "Low";
+            }
+
+            var topReasons = BuildTopReasons(riskLevel, reasonScores);
+
+            var warningMessage = BuildWarningMessage(riskLevel, reasonScores);
+
+            return new OrderRiskDecision
+            {
+                RiskLevel = riskLevel,
+                WarningMessage = warningMessage,
+                Suggestion = GetSuggestion(riskLevel),
+                Reasons = topReasons,
+                FinalScore = finalScore
+            };
+        }
+
+        private static List<string> BuildTopReasons(
+            string riskLevel,
+            List<(string Field, float Impact, string Message)> reasonScores)
+        {
+            if (riskLevel == "Low")
+            {
+                return new List<string>
+                {
+                    "Không phát hiện dấu hiệu bất thường rõ ràng trong đơn hàng này."
+                };
             }
 
             var topReasons = reasonScores
@@ -575,23 +699,15 @@ namespace Demo_web_MVC.Service
 
             if (!topReasons.Any())
             {
-                topReasons.Add("Không phát hiện dấu hiệu bất thường rõ ràng trong đơn hàng này.");
+                topReasons.Add("Đơn hàng có một số dấu hiệu cần kiểm tra thêm trước khi xử lý.");
             }
 
-            var warningMessage = BuildWarningMessage(riskLevel, reasonScores);
-
-            return new OrderRiskDecision
-            {
-                RiskLevel = riskLevel,
-                WarningMessage = warningMessage,
-                Suggestion = GetSuggestion(riskLevel),
-                Reasons = topReasons,
-                FinalScore = finalScore
-            };
+            return topReasons;
         }
+
         private static string BuildWarningMessage(
-    string riskLevel,
-    List<(string Field, float Impact, string Message)> reasonScores)
+            string riskLevel,
+            List<(string Field, float Impact, string Message)> reasonScores)
         {
             if (riskLevel == "DataWarning")
             {
@@ -619,16 +735,9 @@ namespace Demo_web_MVC.Service
                 return "Đơn hàng có một số dấu hiệu cần được kiểm tra thêm trước khi xử lý.";
             }
 
-            string fieldText;
-
-            if (topFields.Count == 1)
-            {
-                fieldText = topFields[0];
-            }
-            else
-            {
-                fieldText = $"{topFields[0]} và {topFields[1]}";
-            }
+            var fieldText = topFields.Count == 1
+                ? topFields[0]
+                : $"{topFields[0]} và {topFields[1]}";
 
             if (riskLevel == "High")
             {
@@ -642,18 +751,86 @@ namespace Demo_web_MVC.Service
 
             return "Đơn hàng không có dấu hiệu rủi ro rõ ràng.";
         }
-        private static bool IsExtremeOrderValueSpike(OrderRiskTrainingData input)
+
+        private static bool IsTrustedVipCustomer(OrderRiskTrainingData input)
         {
-            return input.TotalOrders >= 5 &&
-                   input.AvgOrderValue > 0 &&
-                   input.CurrentOrderValue >= input.AvgOrderValue * 7 &&
-                   input.CurrentOrderValue >= 5000000 &&
-                   input.TotalQuantity >= 8 &&
-                   input.ItemCount >= 4;
+            return input.IsVip == 1 &&
+                   input.TotalOrders >= 5 &&
+                   input.CompletedOrderCount >= 5 &&
+                   input.CompletionRate >= 0.8f &&
+                   input.CancelRate <= 0.15f;
         }
+
+        private static bool IsGoodHistoryCustomer(OrderRiskTrainingData input)
+        {
+            return input.AccountAgeDays >= 30 &&
+                   input.TotalOrders >= 5 &&
+                   input.CompletedOrderCount >= 4 &&
+                   input.CompletionRate >= 0.8f &&
+                   input.CancelRate <= 0.15f;
+        }
+
+        private static (float MediumValue, float HighValue, float VeryHighValue)
+            GetOrderValueThresholds(OrderRiskTrainingData input)
+        {
+            if (IsTrustedVipCustomer(input))
+            {
+                // VIP tốt:
+                // Dưới 10 triệu có thể Low nếu không có dấu hiệu xấu.
+                // Từ 10 triệu bắt đầu đáng chú ý.
+                return (10000000, 30000000, 50000000);
+            }
+
+            if (IsGoodHistoryCustomer(input))
+            {
+                // Khách có lịch sử tốt nhưng chưa đủ VIP.
+                return (12000000, 25000000, 40000000);
+            }
+
+            // Khách thường hoặc lịch sử chưa đẹp.
+            return (8000000, 15000000, 30000000);
+        }
+
+        private static bool IsGoodCustomer(OrderRiskTrainingData input)
+        {
+            var thresholds = GetOrderValueThresholds(input);
+
+            return IsGoodHistoryCustomer(input) &&
+                   input.CurrentOrderValue <= thresholds.HighValue &&
+                   input.TotalQuantity <= 10 &&
+                   input.ItemCount <= 5;
+        }
+
+        private static bool IsTrustedCustomerLowValueOrder(OrderRiskTrainingData input)
+        {
+            return IsTrustedVipCustomer(input) &&
+                   input.CurrentOrderValue < 10000000 &&
+                   input.TotalQuantity <= 3 &&
+                   input.ItemCount <= 2 &&
+                   input.OrdersLast24h <= 1 &&
+                   input.OrdersLast7d <= 3 &&
+                   input.CancelledOrders == 0 &&
+                   input.CancelRate <= 0.15f &&
+                   input.CompletionRate >= 0.8f;
+        }
+
+        private static bool IsNewCustomerNormalOrder(OrderRiskTrainingData input)
+        {
+            return input.AccountAgeDays <= 7 &&
+                   input.TotalOrders == 0 &&
+                   input.CancelledOrders == 0 &&
+                   input.OrdersLast24h == 0 &&
+                   input.OrdersLast7d == 0 &&
+                   input.CurrentOrderValue < 2000000 &&
+                   input.TotalQuantity <= 3 &&
+                   input.ItemCount <= 2;
+        }
+
         private static bool IsMediumOnlyCase(OrderRiskTrainingData input)
         {
-            return input.CurrentOrderValue < 3000000 &&
+            var thresholds = GetOrderValueThresholds(input);
+
+            return input.CurrentOrderValue < thresholds.HighValue &&
                    input.TotalQuantity < 10 &&
                    input.ItemCount <= 5 &&
                    input.OrdersLast24h <= 1 &&
@@ -661,25 +838,113 @@ namespace Demo_web_MVC.Service
                    input.CancelRate < 0.35f &&
                    input.CompletionRate >= 0.7f;
         }
-        
-        private static bool IsGoodCustomer(OrderRiskTrainingData input)
+
+        private static bool IsSignificantOrderValueCase(OrderRiskTrainingData input)
         {
-            return input.AccountAgeDays >= 30 &&
-                   input.TotalOrders >= 5 &&
-                   input.CompletedOrderCount >= 4 &&
-                   input.CompletionRate >= 0.8f &&
-                   input.CancelRate <= 0.15f &&
-                   input.CurrentOrderValue <= 3000000 &&
+            var thresholds = GetOrderValueThresholds(input);
+
+            return input.CurrentOrderValue >= thresholds.MediumValue &&
                    input.TotalQuantity <= 10 &&
                    input.ItemCount <= 5;
         }
+
         private static bool IsStrongOrderValueSpike(OrderRiskTrainingData input)
         {
-            return input.TotalOrders >= 3 &&
-                   input.AvgOrderValue > 0 &&
+            var thresholds = GetOrderValueThresholds(input);
+
+            var minAvgValueForSpike = IsTrustedVipCustomer(input)
+                ? 5000000
+                : 3000000;
+
+            return input.TotalOrders >= 5 &&
+                   input.AvgOrderValue >= minAvgValueForSpike &&
                    input.CurrentOrderValue >= input.AvgOrderValue * 4 &&
-                   input.CurrentOrderValue >= 2500000;
+                   input.CurrentOrderValue >= thresholds.HighValue;
         }
+
+        private static bool IsExtremeOrderValueSpike(OrderRiskTrainingData input)
+        {
+            var thresholds = GetOrderValueThresholds(input);
+
+            var minAvgValueForSpike = IsTrustedVipCustomer(input)
+                ? 5000000
+                : 3000000;
+
+            return input.TotalOrders >= 5 &&
+                   input.AvgOrderValue >= minAvgValueForSpike &&
+                   input.CurrentOrderValue >= input.AvgOrderValue * 5 &&
+                   input.CurrentOrderValue >= thresholds.VeryHighValue &&
+                   input.TotalQuantity >= 8 &&
+                   input.ItemCount >= 4;
+        }
+
+        private static bool IsHighRiskByBadHistory(OrderRiskTrainingData input)
+        {
+            var thresholds = GetOrderValueThresholds(input);
+
+            // VIP tốt không bị kéo High bởi rule lịch sử xấu.
+            if (IsTrustedVipCustomer(input))
+            {
+                return false;
+            }
+
+            var highValueWithVeryWeakCompletion =
+                input.TotalOrders >= 10 &&
+                input.CurrentOrderValue >= thresholds.HighValue &&
+                input.CompletionRate < 0.3f &&
+                input.CompletedOrderCount <= 2;
+
+            var highValueWithManyCancelledOrders =
+                input.TotalOrders >= 10 &&
+                input.CurrentOrderValue >= thresholds.HighValue &&
+                input.CancelledOrders >= 5 &&
+                input.CancelRate >= 0.2f;
+
+            var veryHighValueWithWeakHistory =
+                input.TotalOrders >= 5 &&
+                input.CurrentOrderValue >= thresholds.VeryHighValue &&
+                (
+                    input.CompletionRate < 0.5f ||
+                    input.CancelledOrders >= 5 ||
+                    input.CancelRate >= 0.2f
+                );
+
+            return highValueWithVeryWeakCompletion ||
+                   highValueWithManyCancelledOrders ||
+                   veryHighValueWithWeakHistory;
+        }
+
+        private static bool IsCriticalHighRiskCase(OrderRiskTrainingData input)
+        {
+            var thresholds = GetOrderValueThresholds(input);
+
+            var veryHighValueWithVeryBadHistory =
+                input.CurrentOrderValue >= thresholds.VeryHighValue &&
+                input.TotalOrders >= 5 &&
+                input.CancelRate >= 0.5f &&
+                input.CancelledOrders >= 5;
+
+            var veryHighValueWithBurstOrders =
+                input.CurrentOrderValue >= thresholds.VeryHighValue &&
+                input.OrdersLast24h >= 3;
+
+            var veryHighValueWithHugeBasket =
+                input.CurrentOrderValue >= thresholds.VeryHighValue &&
+                input.TotalQuantity >= 20 &&
+                input.ItemCount >= 6;
+
+            var severeCancellationPattern =
+                input.TotalOrders >= 5 &&
+                input.CancelRate >= 0.7f &&
+                input.CancelledOrders >= 5 &&
+                input.CurrentOrderValue >= thresholds.HighValue;
+
+            return veryHighValueWithVeryBadHistory ||
+                   veryHighValueWithBurstOrders ||
+                   veryHighValueWithHugeBasket ||
+                   severeCancellationPattern;
+        }
+
         private static float NormalizeAiScore(float aiScore)
         {
             if (aiScore >= 80)
