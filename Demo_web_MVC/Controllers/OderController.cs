@@ -53,14 +53,21 @@ namespace Demo_web_MVC.Controllers
                     return RedirectToAction("Login", "User");
                 }
 
-                var orderId = await _service
-                    .CreateOrderFromCartAsyncService(userId.Value, paymentMethod,selectedCartItemIds);
+                var orderIds = await _service.CreateOrderFromCartAsyncService(
+                    userId.Value,
+                    paymentMethod,
+                    selectedCartItemIds
+                );
+
+                if (orderIds == null || !orderIds.Any())
+                {
+                    TempData["ErrorMessage"] = "Không tạo được đơn hàng.";
+                    return RedirectToAction("Index", "Cart");
+                }
 
                 TempData["SuccessMessage"] = "Đặt hàng thành công.";
 
-                return RedirectToAction("Details", "Oder", new { orderId = orderId });
-
-                
+                return RedirectToAction("Details", "Oder", new { orderId = orderIds.First() });
             }
             catch (ArgumentException ex)
             {
@@ -80,7 +87,7 @@ namespace Demo_web_MVC.Controllers
                 return RedirectToAction("Index", "Cart");
             }
         }
-        
+
         public async Task<IActionResult> MyOrders()
         {
             var userId = GetUserIdFromClaims();

@@ -43,21 +43,33 @@ namespace Demo_web_MVC.Service
                 TotalOrders = dto.TotalOrders,
                 OrdersLast24h = dto.OrdersLast24h,
                 OrdersLast7d = dto.OrdersLast7d,
+
                 CancelledOrders = dto.CancelledOrders,
                 CancelRate = (float)dto.CancelRate,
+
                 CurrentOrderValue = (float)dto.CurrentOrderValue,
                 AvgOrderValue = (float)dto.AvgOrderValue,
+
                 IsCod = dto.IsCod,
                 CodOrderCount = dto.CodOrderCount,
+
                 PhoneUsedCount = dto.PhoneUsedCount,
                 AddressUsedCount = dto.AddressUsedCount,
+
                 ItemCount = dto.ItemCount,
                 TotalQuantity = dto.TotalQuantity,
+
                 StatusChangeCount = dto.StatusChangeCount,
+
                 CancelledOrdersLast24h = dto.CancelledOrdersLast24h,
                 CancelRateLast24h = (float)dto.CancelRateLast24h,
                 CancelledOrdersLast7d = dto.CancelledOrdersLast7d,
-                CancelRateLast7d = (float)dto.CancelRateLast7d
+                CancelRateLast7d = (float)dto.CancelRateLast7d,
+
+                // 3 trường mới bắt buộc phải map
+                IsVip = dto.IsVip,
+                CompletedOrderCount = dto.CompletedOrderCount,
+                CompletionRate = (float)dto.CompletionRate
             };
             var prediction = _orderRiskPredictor.Predict(input);
 

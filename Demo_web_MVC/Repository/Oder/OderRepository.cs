@@ -23,7 +23,10 @@ namespace Demo_web_MVC.Repository.Oder
             _logger = logger;
             _addressRepository = addressRepository;
         }
-        public async Task<int> CreateOrderFromCartAsync(int userId, string paymentMethod, List<int> selectedCartItemIds)
+        public async Task<List<int>> CreateOrderFromCartAsync(
+    int userId,
+    string paymentMethod,
+    List<int> selectedCartItemIds)
         {
             var cart = await _context.Carts
                 .Where(c => c.UserId == userId && c.Status == "active")
@@ -37,18 +40,18 @@ namespace Demo_web_MVC.Repository.Oder
                 throw new InvalidOperationException("No active cart found for the user.");
             }
 
-            
             var selectedItems = cart.CartItems
                 .Where(ci => selectedCartItemIds.Contains(ci.Id)
                              && ci.Variant != null
                              && ci.Variant.Product != null
                              && ci.Variant.Product.SellerId != null)
                 .ToList();
-            
+
             if (!selectedItems.Any())
             {
                 throw new InvalidOperationException("No selected items to checkout.");
             }
+
             foreach (var item in selectedItems)
             {
                 if (item.Variant.Stock <= 0)
@@ -70,11 +73,11 @@ namespace Demo_web_MVC.Repository.Oder
                 ? method
                 : PaymentMethod.COD;
 
-            
             var itemsBySeller = selectedItems
                 .GroupBy(ci => ci.Variant.Product.SellerId!.Value)
                 .ToList();
-            var firstOrderId = 0;
+
+            var createdOrderIds = new List<int>();
 
             foreach (var sellerGroup in itemsBySeller)
             {
@@ -90,12 +93,11 @@ namespace Demo_web_MVC.Repository.Oder
                 };
 
                 _context.Orders.Add(order);
+
+                // Save trước để lấy order.Id
                 await _context.SaveChangesAsync();
 
-                if (firstOrderId == 0)
-                {
-                    firstOrderId = order.Id;
-                }
+                createdOrderIds.Add(order.Id);
 
                 foreach (var item in sellerGroup)
                 {
@@ -149,6 +151,7 @@ namespace Demo_web_MVC.Repository.Oder
                     IsRead = false,
                     CreatedAt = DateTime.Now
                 });
+
                 await AddNotificationsForAdminsAsync(
                     "Có đơn hàng mới",
                     $"Khách hàng vừa tạo đơn hàng #{order.Id}.",
@@ -161,7 +164,7 @@ namespace Demo_web_MVC.Repository.Oder
             _context.CartItems.RemoveRange(selectedItems);
             await _context.SaveChangesAsync();
 
-            return firstOrderId;
+            return createdOrderIds;
         }
         public async Task<Order> GetOrderByIdAsync(  int orderId)
         {

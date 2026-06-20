@@ -42,5 +42,10 @@
         public int CancelledOrdersLast7d { get; set; }
 
         public decimal CancelRateLast7d { get; set; }
+        public int IsVip { get; set; }
+
+        public int CompletedOrderCount { get; set; }
+
+        public decimal CompletionRate { get; set; }
     }
 }
