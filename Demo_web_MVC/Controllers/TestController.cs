@@ -8,6 +8,7 @@ using Demo_web_MVC.Service.Birth;
 using Demo_web_MVC.Service.Product;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using System.Text;
 using System.Text.Json;
 
 namespace Demo_web_MVC.Controllers
@@ -56,363 +57,7 @@ namespace Demo_web_MVC.Controllers
             return Content(result);
         }
 
-        public IActionResult TestPublicDatasetLikeCases()
-        {
-            var cases = new List<OrderRiskTrainingData>
-    {
         
-        new OrderRiskTrainingData
-        {
-            AccountAgeDays = 120,
-            TotalOrders = 1,
-            OrdersLast24h = 0,
-            OrdersLast7d = 1,
-            CancelledOrders = 0,
-            CancelRate = 0,
-            CurrentOrderValue = 180000,
-            AvgOrderValue = 180000,
-            IsCod = 0,
-            CodOrderCount = 0,
-            PhoneUsedCount = 0,
-            AddressUsedCount = 0,
-            ItemCount = 2,
-            TotalQuantity = 3,
-            StatusChangeCount = 0,
-            CancelledOrdersLast24h = 0,
-            CancelRateLast24h = 0,
-            CancelledOrdersLast7d = 0,
-            CancelRateLast7d = 0
-        },
-
-        // Case 2: Khách mua nhiều lần, lịch sử ổn
-        // Pattern: khách cũ, nhiều invoice, không hủy
-        // Kỳ vọng: Low
-        new OrderRiskTrainingData
-        {
-            AccountAgeDays = 240,
-            TotalOrders = 12,
-            OrdersLast24h = 0,
-            OrdersLast7d = 2,
-            CancelledOrders = 0,
-            CancelRate = 0,
-            CurrentOrderValue = 420000,
-            AvgOrderValue = 390000,
-            IsCod = 0,
-            CodOrderCount = 0,
-            PhoneUsedCount = 0,
-            AddressUsedCount = 0,
-            ItemCount = 4,
-            TotalQuantity = 6,
-            StatusChangeCount = 0,
-            CancelledOrdersLast24h = 0,
-            CancelRateLast24h = 0,
-            CancelledOrdersLast7d = 0,
-            CancelRateLast7d = 0
-        },
-
-        // Case 3: Khách mua sỉ nhẹ
-        // UCI Online Retail có nhiều khách wholesale, nên quantity có thể cao hơn
-        // Kỳ vọng: Low hoặc Medium nhẹ
-        new OrderRiskTrainingData
-        {
-            AccountAgeDays = 300,
-            TotalOrders = 20,
-            OrdersLast24h = 0,
-            OrdersLast7d = 3,
-            CancelledOrders = 1,
-            CancelRate = 0.05f,
-            CurrentOrderValue = 1200000,
-            AvgOrderValue = 900000,
-            IsCod = 0,
-            CodOrderCount = 0,
-            PhoneUsedCount = 0,
-            AddressUsedCount = 0,
-            ItemCount = 8,
-            TotalQuantity = 20,
-            StatusChangeCount = 0,
-            CancelledOrdersLast24h = 0,
-            CancelRateLast24h = 0,
-            CancelledOrdersLast7d = 0,
-            CancelRateLast7d = 0
-        },
-
-        // Case 4: Khách cũ, có 1 đơn bị hủy trong lịch sử
-        // Kỳ vọng: Low
-        new OrderRiskTrainingData
-        {
-            AccountAgeDays = 180,
-            TotalOrders = 10,
-            OrdersLast24h = 0,
-            OrdersLast7d = 2,
-            CancelledOrders = 1,
-            CancelRate = 0.1f,
-            CurrentOrderValue = 350000,
-            AvgOrderValue = 400000,
-            IsCod = 0,
-            CodOrderCount = 0,
-            PhoneUsedCount = 0,
-            AddressUsedCount = 0,
-            ItemCount = 3,
-            TotalQuantity = 5,
-            StatusChangeCount = 0,
-            CancelledOrdersLast24h = 0,
-            CancelRateLast24h = 0,
-            CancelledOrdersLast7d = 0,
-            CancelRateLast7d = 0
-        },
-
-        // Case 5: Khách có nhiều đơn gần đây nhưng chưa hủy nhiều
-        // Pattern: khách mua thường xuyên trong tuần
-        // Kỳ vọng: Low hoặc Medium nhẹ
-        new OrderRiskTrainingData
-        {
-            AccountAgeDays = 90,
-            TotalOrders = 18,
-            OrdersLast24h = 1,
-            OrdersLast7d = 6,
-            CancelledOrders = 1,
-            CancelRate = 0.056f,
-            CurrentOrderValue = 560000,
-            AvgOrderValue = 450000,
-            IsCod = 0,
-            CodOrderCount = 0,
-            PhoneUsedCount = 0,
-            AddressUsedCount = 0,
-            ItemCount = 5,
-            TotalQuantity = 8,
-            StatusChangeCount = 0,
-            CancelledOrdersLast24h = 0,
-            CancelRateLast24h = 0,
-            CancelledOrdersLast7d = 1,
-            CancelRateLast7d = 0.167f
-        },
-
-        // Case 6: Hóa đơn có giá trị cao hơn trung bình
-        // Dataset thật có khách mua nhiều mặt hàng trong một invoice
-        // Kỳ vọng: Medium
-        new OrderRiskTrainingData
-        {
-            AccountAgeDays = 150,
-            TotalOrders = 8,
-            OrdersLast24h = 0,
-            OrdersLast7d = 2,
-            CancelledOrders = 1,
-            CancelRate = 0.125f,
-            CurrentOrderValue = 1800000,
-            AvgOrderValue = 450000,
-            IsCod = 0,
-            CodOrderCount = 0,
-            PhoneUsedCount = 0,
-            AddressUsedCount = 0,
-            ItemCount = 12,
-            TotalQuantity = 30,
-            StatusChangeCount = 0,
-            CancelledOrdersLast24h = 0,
-            CancelRateLast24h = 0,
-            CancelledOrdersLast7d = 0,
-            CancelRateLast7d = 0
-        },
-
-        // Case 7: Khách có tỷ lệ hủy trung bình
-        // Trong UCI, hóa đơn bắt đầu bằng C thường được xem là cancellation/return
-        // Kỳ vọng: Medium
-        new OrderRiskTrainingData
-        {
-            AccountAgeDays = 200,
-            TotalOrders = 9,
-            OrdersLast24h = 0,
-            OrdersLast7d = 4,
-            CancelledOrders = 3,
-            CancelRate = 0.333f,
-            CurrentOrderValue = 480000,
-            AvgOrderValue = 430000,
-            IsCod = 0,
-            CodOrderCount = 0,
-            PhoneUsedCount = 0,
-            AddressUsedCount = 0,
-            ItemCount = 4,
-            TotalQuantity = 7,
-            StatusChangeCount = 0,
-            CancelledOrdersLast24h = 0,
-            CancelRateLast24h = 0,
-            CancelledOrdersLast7d = 2,
-            CancelRateLast7d = 0.5f
-        },
-
-        // Case 8: Khách có nhiều đơn hủy trong lịch sử
-        // Kỳ vọng: High
-        new OrderRiskTrainingData
-        {
-            AccountAgeDays = 160,
-            TotalOrders = 10,
-            OrdersLast24h = 0,
-            OrdersLast7d = 5,
-            CancelledOrders = 5,
-            CancelRate = 0.5f,
-            CurrentOrderValue = 520000,
-            AvgOrderValue = 400000,
-            IsCod = 0,
-            CodOrderCount = 0,
-            PhoneUsedCount = 0,
-            AddressUsedCount = 0,
-            ItemCount = 5,
-            TotalQuantity = 9,
-            StatusChangeCount = 0,
-            CancelledOrdersLast24h = 0,
-            CancelRateLast24h = 0,
-            CancelledOrdersLast7d = 3,
-            CancelRateLast7d = 0.6f
-        },
-
-        // Case 9: Nhiều đơn trong 24h, giống khách đặt nhiều invoice gần nhau
-        // Kỳ vọng: High theo rule của hệ thống bạn
-        new OrderRiskTrainingData
-        {
-            AccountAgeDays = 60,
-            TotalOrders = 6,
-            OrdersLast24h = 3,
-            OrdersLast7d = 6,
-            CancelledOrders = 0,
-            CancelRate = 0,
-            CurrentOrderValue = 300000,
-            AvgOrderValue = 280000,
-            IsCod = 0,
-            CodOrderCount = 0,
-            PhoneUsedCount = 0,
-            AddressUsedCount = 0,
-            ItemCount = 3,
-            TotalQuantity = 4,
-            StatusChangeCount = 0,
-            CancelledOrdersLast24h = 0,
-            CancelRateLast24h = 0,
-            CancelledOrdersLast7d = 0,
-            CancelRateLast7d = 0
-        },
-
-        // Case 10: Khách mới, mua đơn nhỏ, không COD
-        // Kỳ vọng: Low
-        new OrderRiskTrainingData
-        {
-            AccountAgeDays = 5,
-            TotalOrders = 1,
-            OrdersLast24h = 1,
-            OrdersLast7d = 1,
-            CancelledOrders = 0,
-            CancelRate = 0,
-            CurrentOrderValue = 220000,
-            AvgOrderValue = 220000,
-            IsCod = 0,
-            CodOrderCount = 0,
-            PhoneUsedCount = 0,
-            AddressUsedCount = 0,
-            ItemCount = 2,
-            TotalQuantity = 2,
-            StatusChangeCount = 0,
-            CancelledOrdersLast24h = 0,
-            CancelRateLast24h = 0,
-            CancelledOrdersLast7d = 0,
-            CancelRateLast7d = 0
-        },
-
-        // Case 11: Khách mới, đơn lớn/số lượng cao, nhưng dataset public không có COD
-        // Kỳ vọng: Medium, vì không COD nhưng giá trị và số lượng cao
-        new OrderRiskTrainingData
-        {
-            AccountAgeDays = 6,
-            TotalOrders = 1,
-            OrdersLast24h = 1,
-            OrdersLast7d = 1,
-            CancelledOrders = 0,
-            CancelRate = 0,
-            CurrentOrderValue = 2500000,
-            AvgOrderValue = 2500000,
-            IsCod = 0,
-            CodOrderCount = 0,
-            PhoneUsedCount = 0,
-            AddressUsedCount = 0,
-            ItemCount = 15,
-            TotalQuantity = 40,
-            StatusChangeCount = 0,
-            CancelledOrdersLast24h = 0,
-            CancelRateLast24h = 0,
-            CancelledOrdersLast7d = 0,
-            CancelRateLast7d = 0
-        },
-
-        // Case 12: Khách mua sỉ ổn định, nhiều đơn nhưng hủy thấp
-        // Kỳ vọng: Low hoặc Medium nhẹ
-        new OrderRiskTrainingData
-        {
-            AccountAgeDays = 365,
-            TotalOrders = 45,
-            OrdersLast24h = 1,
-            OrdersLast7d = 7,
-            CancelledOrders = 2,
-            CancelRate = 0.044f,
-            CurrentOrderValue = 1500000,
-            AvgOrderValue = 1300000,
-            IsCod = 0,
-            CodOrderCount = 0,
-            PhoneUsedCount = 0,
-            AddressUsedCount = 0,
-            ItemCount = 10,
-            TotalQuantity = 35,
-            StatusChangeCount = 0,
-            CancelledOrdersLast24h = 0,
-            CancelRateLast24h = 0,
-            CancelledOrdersLast7d = 1,
-            CancelRateLast7d = 0.143f
-        }
-    };
-
-            var results = cases.Select((input, index) =>
-            {
-                var prediction = _orderRiskPredictor.Predict(input);
-
-                var decision = _orderRiskPredictor.GetRiskDecision(input, prediction);
-
-                return new
-                {
-                    Case = index + 1,
-                    Source = "Mapped from public real retail dataset patterns",
-                    MissingFieldsDefaultedToZero = new[]
-                    {
-                        "IsCod",
-                        "CodOrderCount",
-                        "PhoneUsedCount",
-                        "AddressUsedCount",
-                        "StatusChangeCount"
-                    },
-                    Expected = index switch
-                    {
-                        0 => "Low",
-                        1 => "Low",
-                        2 => "Low hoặc Medium nhẹ",
-                        3 => "Low",
-                        4 => "Low hoặc Medium nhẹ",
-                        5 => "Medium",
-                        6 => "Medium",
-                        7 => "High",
-                        8 => "High",
-                        9 => "Low",
-                        10 => "Medium",
-                        11 => "Low hoặc Medium nhẹ",
-                        _ => ""
-                    },
-                    Input = input,
-                    Prediction = new
-                    {
-                        prediction.IsRisk,
-                        prediction.Score,
-                        RiskLevel = decision.RiskLevel,
-                        Suggestion = decision.Suggestion,
-                        Reasons = decision.Reasons
-                    }
-                };
-            });
-
-            return Json(results);
-        }
         public async Task<IActionResult> TestBirthdayEmail()
         {
             _logger.LogWarning("Bắt đầu");
@@ -704,6 +349,269 @@ namespace Demo_web_MVC.Controllers
             public string Title { get; set; } = "";
 
             public List<string> Images { get; set; } = new();
+        }
+        public IActionResult OrderRiskTestCases()
+        {
+            var predictor = new OrderRiskPredictor();
+
+            var testCases = new List<(string Name, OrderRiskTrainingData Input, string ExpectedLevel)>
+{
+    // =========================
+    // SIÊU KHÓ - khách rất tốt nhưng có dấu hiệu bất thường mạnh
+    // =========================
+    (
+        "TC01 - VIP rất tốt nhưng đơn tăng đột biến cực mạnh",
+        new OrderRiskTrainingData
+        {
+            AccountAgeDays = 420,
+            TotalOrders = 25,
+            OrdersLast24h = 1,
+            OrdersLast7d = 2,
+            CancelledOrders = 1,
+            CancelRate = 0.04f,
+            CurrentOrderValue = 6500000,
+            AvgOrderValue = 800000,
+            IsCod = 1,
+            CodOrderCount = 12,
+            PhoneUsedCount = 1,
+            AddressUsedCount = 1,
+            ItemCount = 5,
+            TotalQuantity = 10,
+            StatusChangeCount = 2,
+            CancelledOrdersLast24h = 0,
+            CancelRateLast24h = 0f,
+            CancelledOrdersLast7d = 0,
+            CancelRateLast7d = 0f,
+            IsVip = 1,
+            CompletedOrderCount = 24,
+            CompletionRate = 0.96f
+        },
+        "High"
+    ),
+
+    // =========================
+    // SIÊU KHÓ - tài khoản mới, đơn cao nhưng chưa đủ để High
+    // =========================
+    (
+        "TC02 - Tài khoản mới, đơn cao nhưng số lượng ít và đã hoàn thành 1 đơn",
+        new OrderRiskTrainingData
+        {
+            AccountAgeDays = 5,
+            TotalOrders = 1,
+            OrdersLast24h = 1,
+            OrdersLast7d = 1,
+            CancelledOrders = 0,
+            CancelRate = 0f,
+            CurrentOrderValue = 4200000,
+            AvgOrderValue = 900000,
+            IsCod = 1,
+            CodOrderCount = 1,
+            PhoneUsedCount = 1,
+            AddressUsedCount = 1,
+            ItemCount = 1,
+            TotalQuantity = 1,
+            StatusChangeCount = 1,
+            CancelledOrdersLast24h = 0,
+            CancelRateLast24h = 0f,
+            CancelledOrdersLast7d = 0,
+            CancelRateLast7d = 0f,
+            IsVip = 0,
+            CompletedOrderCount = 1,
+            CompletionRate = 1f
+        },
+        "Medium"
+    ),
+
+    // =========================
+    // SIÊU KHÓ - cancelRate đáng chú ý nhưng đơn hiện tại nhỏ
+    // =========================
+    (
+        "TC03 - Khách cũ, cancelRate trung bình cao nhưng đơn hiện tại rất nhỏ",
+        new OrderRiskTrainingData
+        {
+            AccountAgeDays = 180,
+            TotalOrders = 12,
+            OrdersLast24h = 1,
+            OrdersLast7d = 2,
+            CancelledOrders = 4,
+            CancelRate = 0.333f,
+            CurrentOrderValue = 450000,
+            AvgOrderValue = 900000,
+            IsCod = 1,
+            CodOrderCount = 10,
+            PhoneUsedCount = 1,
+            AddressUsedCount = 1,
+            ItemCount = 2,
+            TotalQuantity = 2,
+            StatusChangeCount = 3,
+            CancelledOrdersLast24h = 0,
+            CancelRateLast24h = 0f,
+            CancelledOrdersLast7d = 1,
+            CancelRateLast7d = 0.5f,
+            IsVip = 0,
+            CompletedOrderCount = 8,
+            CompletionRate = 0.667f
+        },
+        "Medium"
+    ),
+
+    // =========================
+    // SIÊU KHÓ - tài khoản mới đặt dồn dập nhưng giá trị thấp
+    // =========================
+    (
+        "TC04 - Tài khoản mới, đặt nhiều đơn trong ngày nhưng đơn hiện tại nhỏ",
+        new OrderRiskTrainingData
+        {
+            AccountAgeDays = 6,
+            TotalOrders = 3,
+            OrdersLast24h = 4,
+            OrdersLast7d = 4,
+            CancelledOrders = 0,
+            CancelRate = 0f,
+            CurrentOrderValue = 600000,
+            AvgOrderValue = 500000,
+            IsCod = 1,
+            CodOrderCount = 3,
+            PhoneUsedCount = 1,
+            AddressUsedCount = 1,
+            ItemCount = 2,
+            TotalQuantity = 3,
+            StatusChangeCount = 1,
+            CancelledOrdersLast24h = 0,
+            CancelRateLast24h = 0f,
+            CancelledOrdersLast7d = 0,
+            CancelRateLast7d = 0f,
+            IsVip = 0,
+            CompletedOrderCount = 3,
+            CompletionRate = 1f
+        },
+        "Medium"
+    ),
+
+    // =========================
+    // SIÊU KHÓ - khách tốt nhưng số lượng/item lớn
+    // =========================
+    (
+        "TC05 - Khách tốt, nhiều item và số lượng lớn nhưng giá trị không cao",
+        new OrderRiskTrainingData
+        {
+            AccountAgeDays = 300,
+            TotalOrders = 18,
+            OrdersLast24h = 1,
+            OrdersLast7d = 2,
+            CancelledOrders = 1,
+            CancelRate = 0.056f,
+            CurrentOrderValue = 1300000,
+            AvgOrderValue = 1100000,
+            IsCod = 1,
+            CodOrderCount = 12,
+            PhoneUsedCount = 1,
+            AddressUsedCount = 1,
+            ItemCount = 7,
+            TotalQuantity = 18,
+            StatusChangeCount = 2,
+            CancelledOrdersLast24h = 0,
+            CancelRateLast24h = 0f,
+            CancelledOrdersLast7d = 0,
+            CancelRateLast7d = 0f,
+            IsVip = 1,
+            CompletedOrderCount = 17,
+            CompletionRate = 0.944f
+        },
+        "Medium"
+    )
+};
+
+            var result = new StringBuilder();
+
+            int passCount = 0;
+            int wrongCount = 0;
+            int fpHighCount = 0;
+            int fnHighCount = 0;
+
+            foreach (var testCase in testCases)
+            {
+                var prediction = predictor.Predict(testCase.Input);
+
+                // Test kết quả cuối cùng sau rule
+                var decision = predictor.GetRiskDecision(testCase.Input, prediction);
+
+                string actualLevel = decision.RiskLevel;
+                string expectedLevel = testCase.ExpectedLevel;
+
+                bool expectedHigh = expectedLevel == "High";
+                bool actualHigh = actualLevel == "High";
+
+                string resultText;
+
+                if (actualLevel == expectedLevel)
+                {
+                    resultText = "PASS";
+                    passCount++;
+                }
+                else
+                {
+                    resultText = "WRONG";
+                    wrongCount++;
+
+                    if (!expectedHigh && actualHigh)
+                    {
+                        fpHighCount++;
+                        resultText = "FP_HIGH";
+                    }
+                    else if (expectedHigh && !actualHigh)
+                    {
+                        fnHighCount++;
+                        resultText = "FN_HIGH";
+                    }
+                }
+
+                result.AppendLine(testCase.Name);
+                result.AppendLine($"ExpectedLevel: {expectedLevel}");
+                result.AppendLine($"ActualLevel: {actualLevel}");
+                result.AppendLine($"AI Raw PredictedRisk: {prediction.IsRisk}");
+                result.AppendLine($"AI Score: {prediction.Score:F6}");
+
+                // Nếu OrderRiskDecision đã có FinalScore thì mở dòng này:
+                // result.AppendLine($"Final Score: {decision.FinalScore:F6}");
+
+                result.AppendLine($"Suggestion: {decision.Suggestion}");
+                result.AppendLine("Reasons:");
+
+                foreach (var reason in decision.Reasons)
+                {
+                    result.AppendLine($"- {reason}");
+                }
+
+                result.AppendLine($"Result: {resultText}");
+                result.AppendLine("------------------------------");
+            }
+
+            result.AppendLine("SUMMARY");
+            result.AppendLine($"Total: {testCases.Count}");
+            result.AppendLine($"PASS: {passCount}");
+            result.AppendLine($"WRONG: {wrongCount}");
+            result.AppendLine($"FP_HIGH: {fpHighCount}");
+            result.AppendLine($"FN_HIGH: {fnHighCount}");
+
+            if (fnHighCount > 0)
+            {
+                result.AppendLine("Đánh giá: Rule đang bỏ lọt một số case High, cần tăng điểm cho dấu hiệu rủi ro mạnh.");
+            }
+            else if (fpHighCount >= 3)
+            {
+                result.AppendLine("Đánh giá: Rule đang đẩy quá nhiều case lên High, cần giảm điểm hoặc tăng ngưỡng High.");
+            }
+            else if (wrongCount >= 6)
+            {
+                result.AppendLine("Đánh giá: Rule còn lệch nhiều giữa Low/Medium/High, cần chỉnh lại điểm cộng/trừ.");
+            }
+            else
+            {
+                result.AppendLine("Đánh giá: Rule tương đối ổn, có thể tinh chỉnh thêm theo từng case sai.");
+            }
+
+            return Content(result.ToString(), "text/plain", Encoding.UTF8);
         }
     }
 }

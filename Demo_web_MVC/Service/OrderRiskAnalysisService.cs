@@ -66,7 +66,8 @@ namespace Demo_web_MVC.Service
             var fraudAnalysis = new FraudAnalysis
             {
                 OrderId = order.Id,
-                RiskScore = (decimal)prediction.Score,
+                //RiskScore = (decimal)prediction.Score,
+                RiskScore = (decimal)decision.FinalScore,
                 ModelName = "FastForest_order_risk_v4_3000",
                 CreatedAt = DateTime.Now,
                 InputSnapshot = JsonSerializer.Serialize(input),

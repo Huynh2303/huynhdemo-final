@@ -61,8 +61,19 @@ namespace Demo_web_MVC.Models
         [LoadColumn(18)]
         public float CancelRateLast7d { get; set; }
 
+        // 3 trường mới từ VIP + Shipping
         [LoadColumn(19)]
+        public float IsVip { get; set; }
+
+        [LoadColumn(20)]
+        public float CompletedOrderCount { get; set; }
+
+        [LoadColumn(21)]
+        public float CompletionRate { get; set; }
+
+        [LoadColumn(22)]
         [ColumnName("Label")]
         public bool IsRisk { get; set; }
+        
     }
 }
