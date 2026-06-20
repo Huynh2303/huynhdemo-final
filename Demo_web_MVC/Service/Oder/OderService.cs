@@ -15,9 +15,11 @@ namespace Demo_web_MVC.Service.Oder
             _logger = logger;
             _orderRiskAnalysisService= orderRiskAnalysisService;
         }
-        public async Task<int> CreateOrderFromCartAsyncService(int userId, string paymentMethod, List<int> selectedCartItemIds)
+        public async Task<List<int>> CreateOrderFromCartAsyncService(
+    int userId,
+    string paymentMethod,
+    List<int> selectedCartItemIds)
         {
-
             if (userId <= 0)
             {
                 throw new ArgumentException("UserId không hợp lệ");
@@ -28,6 +30,10 @@ namespace Demo_web_MVC.Service.Oder
                 throw new ArgumentException("Payment method không được để trống");
             }
 
+            if (selectedCartItemIds == null || !selectedCartItemIds.Any())
+            {
+                throw new ArgumentException("Chưa chọn sản phẩm để đặt hàng");
+            }
 
             if (!Enum.TryParse(paymentMethod, true, out PaymentMethod method))
             {
@@ -36,18 +42,33 @@ namespace Demo_web_MVC.Service.Oder
 
             try
             {
+                var orderIds = await _oderRepository.CreateOrderFromCartAsync(
+                    userId,
+                    paymentMethod,
+                    selectedCartItemIds
+                );
 
-                var orderId = await _oderRepository.CreateOrderFromCartAsync(userId, paymentMethod,selectedCartItemIds);
-                _logger.LogInformation("Tạo đơn hàng thành công. UserId={UserId}, OrderId={OrderId}", userId, orderId);
-                await _orderRiskAnalysisService.AnalyzeOrderAsync(orderId);
-                await _oderRepository.RemoveCartItemsAsync(selectedCartItemIds, userId);
-                
-                return orderId;
+                if (orderIds == null || !orderIds.Any())
+                {
+                    throw new InvalidOperationException("Không tạo được đơn hàng nào.");
+                }
+
+                _logger.LogInformation(
+                    "Tạo đơn hàng thành công. UserId={UserId}, OrderIds={OrderIds}",
+                    userId,
+                    string.Join(",", orderIds)
+                );
+
+                foreach (var orderId in orderIds)
+                {
+                    await _orderRiskAnalysisService.AnalyzeOrderAsync(orderId);
+                }
+
+                return orderIds;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Lỗi khi tạo đơn hàng. UserId={UserId}", userId);
-                _logger.LogError(ex.Message, ex);
                 throw;
             }
         }

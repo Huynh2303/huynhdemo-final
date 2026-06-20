@@ -5,7 +5,7 @@ namespace Demo_web_MVC.Repository.Oder
 {
     public interface IOderRepository
     {
-        Task<int> CreateOrderFromCartAsync(int userId, string paymentMethod, List<int> selectedCartItemIds);
+        Task<List<int>> CreateOrderFromCartAsync(int userId, string paymentMethod, List<int> selectedCartItemIds);
         Task<Order> GetOrderByIdAsync( int orderId);
         Task<OderViewModel?> GetOrderDetailAsync(int userId, int orderId);
         Task<List<OderViewModel>> GetOrdersByUserAsync(int userId);

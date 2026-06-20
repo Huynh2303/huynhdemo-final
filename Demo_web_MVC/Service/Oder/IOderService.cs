@@ -5,7 +5,7 @@ namespace Demo_web_MVC.Service.Oder
     public interface IOderService
     {
         Task<OderViewModel?> GetOrderDetailAsyncService(int userId, int orderId);
-        Task<int> CreateOrderFromCartAsyncService(int userId, string paymentMethod, List<int> selectedCartItemIds);
+        Task<List<int>> CreateOrderFromCartAsyncService(int userId, string paymentMethod, List<int> selectedCartItemIds);
 
         //Task<Order> GetOrderByIdAsyncService(int orderId);
 
